@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bridge Course · Day-1 — Design Thinking &amp; Paper Prototyping</title>
+
+<!-- Switzer: single typeface for the "Yogabar" template (Fontshare) -->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — "Yogabar" template (white + royal blue report style)
+   =========================================== */
+:root{
+  --ink:#1A1A1A;
+  --royal:#3062DC;
+  --charcoal:#262626;
+  --gmid:#505050;
+  --gsoft:#979797;
+  --line:#E5E5E5;
+  --tint:#EEF3FE;
+  --grad-a:#2C4FA2; --grad-b:#7C94CD; --grad-c:#3356AE;
+  --white:#FFFFFF;
+  --stage-bg:#0d0d0d; --slide-bg:#FFFFFF;
+  --font:"Switzer",-apple-system,sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* === fixed-stage base (viewport-base) === */
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--stage-bg);}
+.deck-viewport{position:fixed;inset:0;overflow:hidden;background:var(--stage-bg);}
+.deck-stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;transform-origin:0 0;background:var(--slide-bg);}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;display:block;visibility:hidden;opacity:0;pointer-events:none;background:var(--slide-bg);}
+.slide.active,.slide.visible{visibility:visible;opacity:1;pointer-events:auto;z-index:1;}
+img,video,canvas,svg{max-width:100%;max-height:100%;}
+@media print{
+  html,body{width:1920px;height:auto;overflow:visible;background:#fff;}
+  .deck-viewport{position:static;overflow:visible;background:#fff;}
+  .deck-stage{position:static;width:auto;height:auto;transform:none!important;background:none;}
+  .slide{position:relative;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;width:1920px;height:1080px;break-after:page;page-break-after:always;}
+  .slide:last-child{break-after:auto;page-break-after:auto;}
+  .chrome,.edit-toggle,.edit-hotzone,.edit-banner,.progress{display:none!important;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.2s!important;}}
+
+/* === TYPOGRAPHY (projector floors) === */
+.slide{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;}
+.eyebrow{font-size:17px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--royal);}
+.eyebrow.muted{color:var(--gsoft);}
+.title{font-size:84px;font-weight:500;line-height:1.03;letter-spacing:-.02em;}
+.title.sm{font-size:62px;}
+.display{font-size:140px;font-weight:500;line-height:1.0;letter-spacing:-.025em;}
+.body{font-size:27px;font-weight:400;line-height:1.5;color:var(--gmid);max-width:900px;}
+.body strong{color:var(--ink);font-weight:600;}
+.dash{width:36px;height:2px;background:var(--ink);margin-top:28px;}
+
+/* === CHROME === */
+.brand{position:absolute;top:56px;right:140px;text-align:right;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);line-height:1.7;z-index:5;}
+.brand span{display:block;color:var(--gsoft);}
+.footline{position:absolute;left:140px;right:140px;bottom:52px;display:flex;justify-content:space-between;align-items:center;font-size:20px;color:var(--gsoft);letter-spacing:.01em;}
+.footline b{color:var(--ink);font-weight:600;}
+.fdash{display:inline-block;width:36px;height:2px;background:var(--ink);margin-right:20px;vertical-align:6px;}
+.pad{position:absolute;inset:0;padding:104px 140px;}
+
+/* === REVEAL === */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s var(--ease),transform .6s var(--ease);}
+.slide.visible .reveal{opacity:1;transform:none;}
+.d1{transition-delay:.10s;}.d2{transition-delay:.20s;}.d3{transition-delay:.30s;}.d4{transition-delay:.40s;}
+
+/* === COVER === */
+.cover .grad{position:absolute;left:0;top:0;bottom:0;width:290px;background:linear-gradient(180deg,var(--grad-a) 0%,var(--grad-b) 55%,var(--grad-c) 100%);}
+.cover .cwrap{position:absolute;left:400px;top:0;bottom:0;width:860px;display:flex;flex-direction:column;justify-content:center;}
+.cover .lead{font-size:30px;color:var(--gmid);font-weight:400;margin-top:34px;max-width:760px;line-height:1.45;}
+.cover .meta{position:absolute;left:400px;bottom:80px;font-size:20px;letter-spacing:.1em;text-transform:uppercase;color:var(--gsoft);font-weight:500;}
+.cover .ph-card{position:absolute;right:120px;top:170px;width:600px;height:740px;}
+
+/* === ILLUSTRATION CARDS === */
+.ph-card{border-radius:28px;overflow:hidden;background:var(--tint);display:flex;align-items:center;justify-content:center;}
+.ph-card svg{width:92%;height:92%;}
+
+/* === STAT CARDS === */
+.stats{display:grid;gap:22px;}
+.stat{border-radius:22px;padding:30px 32px 28px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;min-height:210px;}
+.stat .n{font-size:70px;font-weight:300;letter-spacing:-.02em;line-height:1;}
+.stat h4{font-size:24px;font-weight:600;margin-top:22px;line-height:1.2;}
+.stat p{font-size:20px;font-weight:400;line-height:1.4;opacity:.85;margin-top:8px;}
+.st-royal{background:var(--royal);}
+.st-ink{background:var(--charcoal);}
+.st-mid{background:var(--gmid);}
+.st-soft{background:var(--gsoft);}
+
+/* === CALLOUT === */
+.callout{margin-top:32px;background:var(--tint);border-left:6px solid var(--royal);border-radius:16px;padding:28px 38px;font-size:27px;font-weight:500;color:var(--ink);line-height:1.45;max-width:1180px;}
+.callout b{font-weight:650;color:var(--royal);}
+
+/* === DESIGN-THINKING STAGE PALETTE (B/W animated icons) === */
+.dtflow{display:flex;align-items:stretch;gap:0;margin-top:56px;}
+.dtcard{flex:1;border:1.5px solid var(--line);border-radius:22px;background:#fff;padding:34px 26px 30px;text-align:center;}
+.dtcard .no{font-size:16px;font-weight:600;letter-spacing:.16em;color:var(--gsoft);}
+.dtcard .icf{width:170px;height:170px;margin:22px auto 0;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;background:#fff;}
+.dtcard .icf svg{width:104px;height:104px;overflow:visible;}
+.dtcard h4{font-size:31px;font-weight:600;margin-top:26px;letter-spacing:-.01em;}
+.dtcard p{font-size:20px;line-height:1.4;color:var(--gmid);margin-top:10px;}
+.dtarrow{flex:none;width:64px;display:flex;align-items:center;justify-content:center;}
+.dtarrow svg{width:36px;height:28px;}
+/* icon motion — GIF-style loops, pure black &amp; white */
+.ic-anim{transform-box:fill-box;transform-origin:center;}
+@keyframes beat{0%,100%{transform:scale(1);}10%{transform:scale(1.16);}20%{transform:scale(1);}30%{transform:scale(1.10);}42%{transform:scale(1);}}
+.ic-heart{animation:beat 1.8s ease-in-out infinite;}
+@keyframes ping{0%{transform:scale(.45);opacity:.9;}80%{transform:scale(1.35);opacity:0;}100%{transform:scale(1.35);opacity:0;}}
+.ic-ring{animation:ping 2s var(--ease) infinite;}
+@keyframes rays{0%,25%,100%{opacity:0;}45%,75%{opacity:1;}}
+.ic-rays{animation:rays 2s ease infinite;}
+@keyframes sketch{0%{stroke-dashoffset:220;}55%,75%{stroke-dashoffset:0;}100%{stroke-dashoffset:220;}}
+.ic-sketch{stroke-dasharray:220;animation:sketch 2.6s ease-in-out infinite;}
+@keyframes nudge{0%,100%{transform:translateX(0);}50%{transform:translateX(14px);}}
+.ic-pencil{animation:nudge 2.6s ease-in-out infinite;}
+@keyframes tick{0%{stroke-dashoffset:70;}45%,80%{stroke-dashoffset:0;}100%{stroke-dashoffset:70;}}
+.ic-tick{stroke-dasharray:70;animation:tick 2.2s ease infinite;}
+@keyframes lens{0%,100%{transform:translate(0,0);}33%{transform:translate(10px,8px);}66%{transform:translate(-8px,10px);}}
+.ic-lens{animation:lens 3s ease-in-out infinite;}
+
+/* === ACTIVITY layout (instruction + timer) === */
+.act{position:absolute;inset:0;padding:100px 140px 118px;display:grid;grid-template-columns:1fr 520px;gap:80px;align-items:start;}
+.act-main .title{margin-top:14px;}
+.act-list{margin-top:34px;list-style:none;counter-reset:step;}
+.act-list li{position:relative;padding-left:76px;font-size:26px;line-height:1.5;color:var(--gmid);margin-bottom:24px;max-width:900px;counter-increment:step;}
+.act-list li::before{content:counter(step,decimal-leading-zero);position:absolute;left:0;top:0;width:52px;height:52px;border-radius:14px;background:var(--royal);color:#fff;font-size:23px;font-weight:500;display:flex;align-items:center;justify-content:center;}
+.act-list li:nth-child(even)::before{background:var(--charcoal);}
+.act-list li b{color:var(--ink);font-weight:600;}
+.act-list.alpha li::before{content:counter(step,lower-alpha);}
+.act-side{display:flex;flex-direction:column;gap:24px;}
+
+/* === REAL TIMER === */
+.timer{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:24px;padding:40px 36px 32px;box-shadow:0 14px 40px rgba(26,26,26,.08);overflow:hidden;}
+.timer::before{content:"";position:absolute;left:0;top:0;height:8px;width:100%;background:var(--line);transition:background .3s;}
+.timer.running::before{background:var(--royal);}
+.timer.done::before{background:var(--ink);}
+.timer-cap{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);}
+.timer-cap .set{color:var(--gsoft);letter-spacing:.06em;}
+.timer-display{font-size:132px;font-weight:300;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin:14px 0 4px;color:var(--ink);}
+.timer.warn .timer-display{color:var(--royal);animation:pulse 1s steps(2) infinite;}
+.timer.done .timer-display{color:var(--gsoft);}
+.timer-state{height:26px;font-size:18px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--royal);}
+@keyframes pulse{0%{opacity:1;}50%{opacity:.35;}100%{opacity:1;}}
+.timer-note{margin-top:16px;border-top:1.5px solid var(--line);padding-top:16px;font-size:20px;color:var(--gsoft);line-height:1.4;}
+.timer-note b{color:var(--ink);font-weight:600;}
+.timer-btns{display:flex;gap:14px;margin-top:24px;}
+.timer-btns button{flex:1;font-family:var(--font);font-size:20px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:17px 0;border-radius:13px;cursor:pointer;transition:filter .15s,background .15s;}
+.timer-btns .t-toggle{background:var(--royal);color:#fff;border:none;}
+.timer-btns .t-toggle:hover{filter:brightness(1.12);}
+.timer-btns .t-reset{background:#fff;color:var(--ink);border:1.5px solid var(--line);}
+.timer-btns .t-reset:hover{background:var(--tint);}
+.timer-hint{margin-top:16px;font-size:19px;color:var(--gsoft);text-align:center;}
+
+/* === QR CARD + REGION TABS === */
+.qr-card{background:#fff;border:1.5px solid var(--line);border-radius:28px;padding:28px 36px 22px;display:inline-flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 14px 40px rgba(26,26,26,.08);}
+.qr-card svg{width:300px;height:300px;shape-rendering:crispEdges;}
+.qr-card .qcap{font-size:20px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);}
+.qr-card .qcap b{color:var(--royal);}
+.rtabs{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;max-width:980px;}
+.rtab{font-family:var(--font);font-size:19px;font-weight:600;letter-spacing:.02em;padding:12px 22px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+.rtab:hover{border-color:var(--royal);background:var(--tint);}
+.rtab.on{background:var(--royal);border-color:var(--royal);color:#fff;}
+/* hero QR — 70% of slide height */
+.qr-card.big{padding:26px 30px 18px;gap:14px;border-radius:32px;}
+.qr-card.big svg{width:756px;height:756px;}
+.qr-card.big .qcap{font-size:25px;letter-spacing:.12em;}
+
+/* === WINNER SLIDE === */
+.winner-wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 200px;}
+.winner-wrap .display{margin-top:36px;}
+.winner-wrap .dash{margin:34px auto 0;}
+.winner-wrap .sub{font-size:32px;color:var(--gmid);line-height:1.5;max-width:1100px;margin-top:30px;font-weight:400;}
+.winner-wrap .sub b{color:var(--royal);font-weight:600;}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+.trophy{width:190px;height:190px;animation:floaty 3.4s ease-in-out infinite;}
+
+/* === RANKER (slide 14, interactive) === */
+.rank-grid{position:absolute;inset:0;padding:100px 140px 118px;display:grid;grid-template-columns:1fr 720px;gap:70px;align-items:start;}
+.pool{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:40px;max-width:760px;}
+.team-chip{position:relative;font-family:var(--font);display:flex;align-items:center;gap:16px;border:1.5px solid var(--line);border-radius:16px;background:#fff;padding:20px 24px;font-size:25px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;transition:border-color .15s,background .15s,opacity .2s;}
+.team-chip:hover{border-color:var(--royal);background:var(--tint);}
+.team-chip .dot{flex:none;width:16px;height:16px;border-radius:5px;background:var(--royal);}
+.team-chip:nth-child(even) .dot{background:var(--charcoal);}
+.team-chip .rk{margin-left:auto;font-size:21px;font-weight:600;color:#fff;background:var(--royal);border-radius:10px;padding:4px 12px;display:none;}
+.team-chip.placed{opacity:.45;cursor:default;border-color:var(--line);background:#fff;}
+.team-chip.placed .rk{display:inline-block;}
+.rank-btns{display:flex;gap:14px;margin-top:34px;max-width:760px;}
+.rank-btns button{flex:1;font-family:var(--font);font-size:20px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:16px 0;border-radius:13px;cursor:pointer;background:#fff;color:var(--ink);border:1.5px solid var(--line);transition:background .15s;}
+.rank-btns button:hover{background:var(--tint);}
+.board{background:#fff;border:1.5px solid var(--line);border-radius:28px;padding:38px 40px;box-shadow:0 14px 40px rgba(26,26,26,.08);min-height:770px;}
+.board .bh{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;}
+.board .bh span:last-child{color:var(--gsoft);letter-spacing:.06em;}
+.board ol{list-style:none;margin-top:22px;}
+.rrow{display:flex;align-items:center;gap:22px;border:1.5px solid var(--line);border-radius:15px;padding:14px 22px;margin-bottom:12px;background:#fff;animation:rise .45s var(--ease) both;}
+@keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+.rrow .rr-rank{flex:none;width:56px;height:44px;border-radius:11px;background:var(--tint);color:var(--royal);font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
+.rrow .rr-name{font-size:25px;font-weight:600;color:var(--ink);}
+.rrow .rr-pts{margin-left:auto;font-size:30px;font-weight:300;color:var(--ink);font-variant-numeric:tabular-nums;}
+.rrow .rr-pts small{font-size:16px;font-weight:600;color:var(--gsoft);margin-left:6px;letter-spacing:.08em;text-transform:uppercase;}
+.rrow.top{background:var(--royal);border-color:var(--royal);}
+.rrow.top .rr-rank{background:rgba(255,255,255,.18);color:#fff;}
+.rrow.top .rr-name,.rrow.top .rr-pts{color:#fff;}
+.rrow.top .rr-pts small{color:rgba(255,255,255,.7);}
+.board .empty{margin-top:26px;font-size:22px;color:var(--gsoft);line-height:1.5;}
+
+/* === DECK CHROME === */
+.chrome{position:fixed;z-index:1000;font-family:var(--font);}
+.counter{right:26px;bottom:22px;font-size:15px;letter-spacing:.12em;color:#cfcfcf;text-transform:uppercase;}
+.counter b{color:#fff;font-weight:600;}
+.nav{left:26px;bottom:20px;display:flex;gap:10px;}
+.nav button{font-family:var(--font);width:46px;height:46px;border:1px solid #3a3a3a;border-radius:10px;background:#171717;color:#eee;font-size:20px;cursor:pointer;transition:.15s;}
+.nav button:hover{background:#262626;border-color:#666;}
+.progress{position:fixed;top:0;left:0;height:4px;background:var(--royal);z-index:1000;transition:width .4s var(--ease);}
+
+/* Inline edit */
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000;cursor:pointer;}
+.edit-toggle{position:fixed;top:18px;left:18px;width:46px;height:46px;border:1px solid #3a3a3a;border-radius:10px;background:#171717;color:#eee;font-size:18px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;z-index:10001;}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto;}
+.edit-toggle.active{background:var(--royal);color:#fff;border-color:var(--royal);}
+body.editing [data-edit]{outline:1.5px dashed var(--royal);outline-offset:4px;cursor:text;}
+.edit-banner{position:fixed;top:18px;left:74px;z-index:10001;background:var(--royal);color:#fff;font-family:var(--font);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:8px;display:none;}
+body.editing .edit-banner{display:block;}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+  <!-- ============ 1. COVER ============ -->
+  <section class="slide cover active">
+    <div class="grad"></div>
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="cwrap">
+      <div class="eyebrow reveal" data-edit>Welcome · Day-1</div>
+      <h1 class="display reveal d1" data-edit style="margin-top:28px;">Bridge<br>Course</h1>
+      <div class="dash reveal d1"></div>
+      <p class="lead reveal d2" data-edit>Day-1: Introduction to Design Thinking and Paper Prototyping</p>
+    </div>
+    <div class="meta reveal d3" data-edit>Teams · Games · Prototypes — Let's Begin</div>
+    <div class="ph-card reveal d2">
+      <svg viewBox="0 0 600 740" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <g stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+          <path d="M300,50 C420,45 520,140 505,262 C490,384 400,436 280,416 C160,396 80,315 95,200 C109,95 180,56 300,50 Z" fill="#3062DC" stroke="none"/>
+          <!-- paper sheet with sketched app frame -->
+          <g transform="translate(170,120) rotate(-4)">
+            <rect x="0" y="0" width="240" height="300" rx="10" fill="#FFFFFF"/>
+            <rect x="26" y="28" width="188" height="44" rx="10" fill="none" stroke="#1A1A1A" stroke-width="4"/>
+            <path d="M26,100 h188 M26,132 h130" stroke="#1A1A1A" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <rect x="26" y="168" width="86" height="86" rx="10" fill="#F7C948" stroke="#1A1A1A" stroke-width="4"/>
+            <rect x="128" y="168" width="86" height="86" rx="10" fill="#F5A8C7" stroke="#1A1A1A" stroke-width="4"/>
+          </g>
+          <!-- big pencil -->
+          <g transform="translate(410,150) rotate(32)">
+            <rect x="-22" y="0" width="44" height="200" rx="8" fill="#F7C948"/>
+            <path d="M-22,200 L0,258 L22,200 Z" fill="#F3B98F"/>
+            <path d="M-8,236 L0,258 L8,236 Z" fill="#1A1A1A" stroke="none"/>
+            <rect x="-22" y="-26" width="44" height="26" rx="8" fill="#F5A8C7"/>
+          </g>
+          <!-- two figures collaborating -->
+          <g transform="translate(150,510)">
+            <rect x="-42" y="66" width="84" height="106" rx="30" fill="#3062DC"/>
+            <circle cx="0" cy="36" r="32" fill="#F3B98F"/>
+            <path d="M-31,32 A32,32 0 0 1 31,24 Q16,2 -6,10 Q-30,18 -31,32 Z" fill="#1A1A1A" stroke="none"/>
+            <circle cx="14" cy="38" r="4" fill="#1A1A1A" stroke="none"/>
+            <path d="M4,52 q10,7 19,-1" fill="none" stroke="#1A1A1A" stroke-width="4"/>
+            <path d="M40,96 l64,-26" stroke="#F3B98F" stroke-width="18" fill="none" stroke-linecap="round"/>
+          </g>
+          <g transform="translate(440,510)">
+            <rect x="-42" y="66" width="84" height="106" rx="30" fill="#262626"/>
+            <circle cx="0" cy="36" r="32" fill="#F3B98F"/>
+            <path d="M-32,30 A32,32 0 0 1 32,30 Q30,-4 0,2 Q-30,6 -32,30 Z" fill="#1A1A1A" stroke="none"/>
+            <circle cx="-14" cy="38" r="4" fill="#1A1A1A" stroke="none"/>
+            <path d="M-24,52 q10,7 19,-1" fill="none" stroke="#1A1A1A" stroke-width="4"/>
+            <path d="M-40,96 l-64,-26" stroke="#F3B98F" stroke-width="18" fill="none" stroke-linecap="round"/>
+          </g>
+          <!-- shared idea bulb between them -->
+          <g transform="translate(295,560)">
+            <circle cx="0" cy="0" r="34" fill="#F7C948"/>
+            <path d="M-10,34 h20 M-7,46 h14" stroke="#1A1A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path d="M0,-52 v-16 M38,-38 l12,-12 M-38,-38 l-12,-12" stroke="#1A1A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
+          </g>
+          <circle cx="540" cy="120" r="9" fill="#F7C948" stroke="none"/>
+          <circle cx="70" cy="330" r="8" fill="#F5A8C7" stroke="none"/>
+          <circle cx="560" cy="430" r="7" fill="#7ED9A2" stroke="none"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ 2. INTRO TO DESIGN THINKING (5-stage palette) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad">
+      <div class="eyebrow reveal" data-edit>The Process</div>
+      <h2 class="title reveal d1" data-edit style="margin-top:18px;">Introduction to Design Thinking</h2>
+      <div class="dash reveal d1"></div>
+      <div class="dtflow reveal d2">
+        <div class="dtcard">
+          <div class="no" data-edit>STAGE 01</div>
+          <div class="icf"><!-- heart, beating -->
+            <svg viewBox="0 0 100 100" fill="none" stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+              <g class="ic-anim ic-heart"><path d="M50 82 C20 60 10 42 16 29 C22 16 40 14 50 30 C60 14 78 16 84 29 C90 42 80 60 50 82 Z"/></g>
+            </svg>
+          </div>
+          <h4 data-edit>Empathise</h4>
+          <p data-edit>Step into the user's shoes — watch, listen, feel.</p>
+        </div>
+        <div class="dtarrow"><svg viewBox="0 0 36 28" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round"><path d="M2 14 h26 M20 5 l9 9 -9 9"/></svg></div>
+        <div class="dtcard">
+          <div class="no" data-edit>STAGE 02</div>
+          <div class="icf"><!-- target, pinging -->
+            <svg viewBox="0 0 100 100" fill="none" stroke="#1A1A1A" stroke-width="5">
+              <circle class="ic-anim ic-ring" cx="50" cy="50" r="40" stroke-width="3"/>
+              <circle cx="50" cy="50" r="38"/>
+              <circle cx="50" cy="50" r="22"/>
+              <circle cx="50" cy="50" r="7" fill="#1A1A1A"/>
+            </svg>
+          </div>
+          <h4 data-edit>Define</h4>
+          <p data-edit>Pin down the one real problem worth solving.</p>
+        </div>
+        <div class="dtarrow"><svg viewBox="0 0 36 28" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round"><path d="M2 14 h26 M20 5 l9 9 -9 9"/></svg></div>
+        <div class="dtcard">
+          <div class="no" data-edit>STAGE 03</div>
+          <div class="icf"><!-- bulb, rays blinking -->
+            <svg viewBox="0 0 100 100" fill="none" stroke="#1A1A1A" stroke-width="5" stroke-linecap="round">
+              <path d="M35 66 C22 56 18 40 27 28 C36 16 64 16 73 28 C82 40 78 56 65 66 C63 68 62 71 62 74 H38 C38 71 37 68 35 66 Z"/>
+              <path d="M40 82 h20 M43 90 h14"/>
+              <path d="M50 44 v14 M43 44 l7 7 7 -7" stroke-width="4"/>
+              <g class="ic-rays"><path d="M50 6 v-2 M50 8 v-6 M18 20 l-6 -6 M82 20 l6 -6 M8 50 h-6 M92 50 h6" stroke-width="4"/></g>
+            </svg>
+          </div>
+          <h4 data-edit>Ideate</h4>
+          <p data-edit>Go wide — many wild ideas beat one safe idea.</p>
+        </div>
+        <div class="dtarrow"><svg viewBox="0 0 36 28" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round"><path d="M2 14 h26 M20 5 l9 9 -9 9"/></svg></div>
+        <div class="dtcard">
+          <div class="no" data-edit>STAGE 04</div>
+          <div class="icf"><!-- paper + pencil sketching -->
+            <svg viewBox="0 0 100 100" fill="none" stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+              <rect x="14" y="10" width="58" height="76" rx="6"/>
+              <path class="ic-sketch" d="M26 30 h34 M26 44 h34 M26 58 h22" stroke-width="4" stroke-linecap="round"/>
+              <g class="ic-anim ic-pencil"><path d="M60 84 L84 60 L92 68 L68 92 Z M60 84 l-4 12 12 -4" stroke-width="4" fill="#fff"/></g>
+            </svg>
+          </div>
+          <h4 data-edit>Prototype</h4>
+          <p data-edit>Build it rough and fast — paper first, pixels later.</p>
+        </div>
+        <div class="dtarrow"><svg viewBox="0 0 36 28" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round"><path d="M2 14 h26 M20 5 l9 9 -9 9"/></svg></div>
+        <div class="dtcard">
+          <div class="no" data-edit>STAGE 05</div>
+          <div class="icf"><!-- magnifier + check drawing -->
+            <svg viewBox="0 0 100 100" fill="none" stroke="#1A1A1A" stroke-width="5" stroke-linecap="round">
+              <g class="ic-anim ic-lens">
+                <circle cx="44" cy="42" r="28"/>
+                <path d="M64 64 l22 22" stroke-width="8"/>
+                <path class="ic-tick" d="M32 42 l9 10 16 -19" stroke-width="5" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <h4 data-edit>Test</h4>
+          <p data-edit>Put it in real hands. Learn. Loop back and refine.</p>
+        </div>
+      </div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Design thinking</span><span>02</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 3. LINE FORMATION ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad">
+      <div class="eyebrow reveal" data-edit>Step 1 · Get Moving</div>
+      <h2 class="title reveal d1" data-edit style="margin-top:18px;">Line Formation</h2>
+      <div class="dash reveal d1"></div>
+      <div class="ph-card reveal d2" style="width:1420px;height:560px;margin:44px auto 0;">
+        <svg viewBox="0 0 1300 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <defs>
+            <g id="girl">
+              <path d="M-17,26 L17,26 L31,88 L-31,88 Z" fill="#262626"/>
+              <path d="M-10,88 v22 M10,88 v22" stroke="#1A1A1A" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="0" cy="0" r="21" fill="#F3B98F"/>
+              <path d="M-21,4 A21,21 0 0 1 21,4 Q22,-26 0,-24 Q-22,-26 -21,4 Z" fill="#1A1A1A"/>
+              <path d="M-21,2 q-7,20 -4,34 M21,2 q7,20 4,34" stroke="#1A1A1A" stroke-width="7" fill="none" stroke-linecap="round"/>
+            </g>
+            <g id="boy">
+              <rect x="-21" y="24" width="42" height="58" rx="16" fill="#3062DC"/>
+              <path d="M-10,82 v26 M10,82 v26" stroke="#1A1A1A" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="0" cy="0" r="21" fill="#F3B98F"/>
+              <path d="M-21,-2 A21,21 0 0 1 21,-4 Q12,-26 -6,-22 Q-20,-18 -21,-2 Z" fill="#1A1A1A"/>
+            </g>
+          </defs>
+          <!-- girls row -->
+          <rect x="60" y="60" width="150" height="52" rx="14" fill="#262626"/>
+          <text x="135" y="94" font-family="Switzer,sans-serif" font-size="24" font-weight="600" letter-spacing="3" fill="#FFFFFF" text-anchor="middle">GIRLS</text>
+          <g transform="translate(0,110)">
+            <use href="#girl" x="310" y="0"/><use href="#girl" x="440" y="0"/><use href="#girl" x="570" y="0"/><use href="#girl" x="700" y="0"/>
+            <use href="#girl" x="830" y="0"/><use href="#girl" x="960" y="0"/><use href="#girl" x="1090" y="0"/><use href="#girl" x="1220" y="0"/>
+          </g>
+          <path d="M280,254 H1260" stroke="#979797" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 16"/>
+          <!-- boys row -->
+          <rect x="60" y="300" width="150" height="52" rx="14" fill="#3062DC"/>
+          <text x="135" y="334" font-family="Switzer,sans-serif" font-size="24" font-weight="600" letter-spacing="3" fill="#FFFFFF" text-anchor="middle">BOYS</text>
+          <g transform="translate(0,350)">
+            <use href="#boy" x="310" y="0"/><use href="#boy" x="440" y="0"/><use href="#boy" x="570" y="0"/><use href="#boy" x="700" y="0"/>
+            <use href="#boy" x="830" y="0"/><use href="#boy" x="960" y="0"/><use href="#boy" x="1090" y="0"/><use href="#boy" x="1220" y="0"/>
+          </g>
+          <path d="M280,494 H1260" stroke="#979797" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 16"/>
+        </svg>
+      </div>
+      <div class="callout reveal d3" data-edit style="max-width:1420px;margin:36px auto 0;text-align:center;border-left:none;border-top:6px solid var(--royal);">“Make Boys and Girls Separate Rows”</div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Line formation</span><span>03</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 4. PICKING UP NUMBERS ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad" style="display:grid;grid-template-columns:1fr 640px;gap:70px;align-items:center;">
+      <div>
+        <div class="eyebrow reveal" data-edit>Step 2 · One By One</div>
+        <h2 class="title reveal d1" data-edit style="margin-top:18px;">Picking up Numbers</h2>
+        <div class="dash reveal d1"></div>
+        <ol class="act-list reveal d2" style="margin-top:40px;">
+          <li data-edit>Number papers are kept on the <b>table in front</b>.</li>
+          <li data-edit><b>One boy and one girl</b> come forward <b>at the same time</b> — in order, from the front of each row.</li>
+          <li data-edit>Pick <b>whichever number paper you like</b> from the table.</li>
+          <li data-edit>Walk back to <b>your own row</b> and stand at the <b>back of the line</b>.</li>
+          <li data-edit>The next <b>one boy and one girl</b> step up. Keep going till <b>everyone holds a number</b>.</li>
+        </ol>
+      </div>
+      <div class="ph-card reveal d3" style="height:700px;">
+        <svg viewBox="0 0 560 640" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <g stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+            <!-- table -->
+            <rect x="130" y="270" width="300" height="26" rx="12" fill="#FFFFFF"/>
+            <path d="M165,296 v90 M395,296 v90" stroke="#1A1A1A" stroke-width="8" fill="none"/>
+            <!-- number chits on table -->
+            <g font-family="Switzer,sans-serif" font-size="28" font-weight="600" text-anchor="middle">
+              <rect x="160" y="212" width="56" height="56" rx="8" fill="#F7C948"/><text x="188" y="250" stroke="none" fill="#1A1A1A">4</text>
+              <rect x="252" y="212" width="56" height="56" rx="8" fill="#F5A8C7" transform="rotate(-6 280 240)"/><text x="278" y="248" stroke="none" fill="#1A1A1A" transform="rotate(-6 280 240)">7</text>
+              <rect x="344" y="212" width="56" height="56" rx="8" fill="#7ED9A2" transform="rotate(5 372 240)"/><text x="372" y="250" stroke="none" fill="#1A1A1A" transform="rotate(5 372 240)">2</text>
+            </g>
+            <!-- girl walking up (left) -->
+            <g transform="translate(90,430)">
+              <path d="M-17,26 L17,26 L31,88 L-31,88 Z" fill="#262626" stroke="none"/>
+              <path d="M-10,88 v24 M10,88 v24" stroke="#1A1A1A" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <circle cx="0" cy="0" r="21" fill="#F3B98F"/>
+              <path d="M-21,4 A21,21 0 0 1 21,4 Q22,-26 0,-24 Q-22,-26 -21,4 Z" fill="#1A1A1A" stroke="none"/>
+              <circle cx="9" cy="4" r="3.5" fill="#1A1A1A" stroke="none"/>
+              <path d="M2,14 q7,5 13,-1" fill="none" stroke="#1A1A1A" stroke-width="3.5"/>
+              <path d="M24,40 l44,-58" stroke="#F3B98F" stroke-width="15" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- boy walking up (right) -->
+            <g transform="translate(470,430)">
+              <rect x="-21" y="24" width="42" height="58" rx="16" fill="#3062DC" stroke="none"/>
+              <path d="M-10,82 v26 M10,82 v26" stroke="#1A1A1A" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <circle cx="0" cy="0" r="21" fill="#F3B98F"/>
+              <path d="M-21,-2 A21,21 0 0 1 21,-4 Q12,-26 -6,-22 Q-20,-18 -21,-2 Z" fill="#1A1A1A" stroke="none"/>
+              <circle cx="-9" cy="4" r="3.5" fill="#1A1A1A" stroke="none"/>
+              <path d="M-15,14 q7,5 13,-1" fill="none" stroke="#1A1A1A" stroke-width="3.5"/>
+              <path d="M-24,40 l-44,-58" stroke="#F3B98F" stroke-width="15" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- approach arrows -->
+            <path d="M150,470 C200,440 220,400 240,330" fill="none" stroke="#3062DC" stroke-width="6" stroke-dasharray="14 12"/>
+            <path d="M240,330 l-16,18 -6,-24 z" fill="#3062DC" stroke="none"/>
+            <path d="M410,470 C360,440 340,400 320,330" fill="none" stroke="#3062DC" stroke-width="6" stroke-dasharray="14 12"/>
+            <path d="M320,330 l16,18 6,-24 z" fill="#3062DC" stroke="none"/>
+            <text x="280" y="580" font-family="Switzer,sans-serif" font-size="26" font-weight="600" letter-spacing="3" fill="#979797" text-anchor="middle" stroke="none">ONE BOY + ONE GIRL, TOGETHER</text>
+          </g>
+        </svg>
+      </div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Picking numbers</span><span>04</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 5. ROW FORMATION ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad">
+      <div class="eyebrow reveal" data-edit>Step 3 · Regroup</div>
+      <h2 class="title reveal d1" data-edit style="margin-top:18px;">Row Formation</h2>
+      <div class="dash reveal d1"></div>
+      <p class="body reveal d2" data-edit style="margin-top:24px;max-width:1400px;">Everyone who picked <strong>number 1</strong> makes one row. Number 2s make the next. Same for every number — until the whole room stands in <strong>10 rows</strong>.</p>
+      <div class="ph-card reveal d3" style="width:1640px;height:520px;margin:36px auto 0;">
+        <svg viewBox="0 0 1560 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <!-- 10 numbered columns, stamped by JS to avoid 40 hand-written nodes -->
+          <g id="cols" font-family="Switzer,sans-serif" text-anchor="middle"></g>
+        </svg>
+      </div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Row formation</span><span>05</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 6. TEAM FORMATION ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad">
+      <div class="eyebrow reveal" data-edit>Step 4 · You're a Team Now</div>
+      <h2 class="title reveal d1" data-edit style="margin-top:18px;">Team Formation</h2>
+      <div class="dash reveal d1"></div>
+      <p class="body reveal d2" data-edit style="margin-top:24px;max-width:1400px;">Look at your row — <strong>each row is now one team</strong>. The people standing with you are your teammates for the whole Bridge Course.</p>
+      <div class="ph-card reveal d3" style="width:1640px;height:520px;margin:36px auto 0;">
+        <svg viewBox="0 0 1560 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <g id="teamcols" font-family="Switzer,sans-serif" text-anchor="middle"></g>
+        </svg>
+      </div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Team formation</span><span>06</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 7. TEAM NAME (5:00 timer) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="act">
+      <div class="act-main">
+        <div class="eyebrow reveal" data-edit>Step 5 · Identity</div>
+        <h2 class="title reveal d1" data-edit>Team Name</h2>
+        <div class="dash reveal d1"></div>
+        <ol class="act-list reveal d2" style="margin-top:38px;">
+          <li data-edit>Huddle up and give your team a <b>name</b> — short, loud, and easy to chant.</li>
+          <li data-edit>Choose one <b>team leader</b> — the person who will speak and collect for the team.</li>
+          <li data-edit>When the timer ends, every leader <b>announces the team name</b> to the room.</li>
+        </ol>
+        <div class="callout reveal d3" data-edit>You have <b>5 minutes</b>. Name first, leader next — go!</div>
+      </div>
+      <div class="act-side">
+        <div class="timer reveal d2" data-seconds="300" aria-label="5 minute team name timer">
+          <div class="timer-cap"><span>Timer</span><span class="set">Set 05:00</span></div>
+          <div class="timer-display">5:00</div>
+          <div class="timer-state"></div>
+          <div class="timer-note" data-edit><b>While they huddle:</b> walk the rows, nudge the quiet teams, and keep names classroom-friendly.</div>
+          <div class="timer-btns"><button class="t-toggle">Start</button><button class="t-reset">Reset</button></div>
+          <div class="timer-hint">Space = start / pause · chime at zero</div>
+        </div>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Team name</span><span>07</span></div>
+  </section>
+
+  <!-- ============ 8. QR CODE (5:00 timer) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad" style="display:grid;grid-template-columns:1fr 830px;gap:56px;align-items:center;padding-top:90px;padding-bottom:96px;">
+      <div>
+        <div class="eyebrow reveal" data-edit>Step 6 · Register Your Team</div>
+        <h2 class="title sm reveal d1" data-edit>Scan the QR code to give team information</h2>
+        <div class="dash reveal d1"></div>
+        <p class="body reveal d2" data-edit style="margin-top:18px;font-size:24px;">Team leader — pick your <strong>region</strong>, scan the code, and fill in your <strong>team name, leader, and member names</strong>. One form per team.</p>
+        <div class="rtabs reveal d2" id="rtabs" style="margin-top:22px;"></div>
+        <div class="timer reveal d3" data-seconds="300" style="margin-top:26px;max-width:520px;" aria-label="5 minute QR registration timer">
+          <div class="timer-cap"><span>Timer</span><span class="set">Set 05:00</span></div>
+          <div class="timer-display">5:00</div>
+          <div class="timer-state"></div>
+          <div class="timer-btns"><button class="t-toggle">Start</button><button class="t-reset">Reset</button></div>
+          <div class="timer-hint">Space = start / pause · chime at zero</div>
+        </div>
+      </div>
+      <div class="qr-card big reveal d2">
+        <svg id="qrSvg" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg" aria-label="Region registration QR code">
+          <path id="qrPath" fill="#1A1A1A" d=""/>
+        </svg>
+        <div class="qcap">Scan · <b id="qrCap">Belagavi Region</b></div>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Team info</span><span>08</span></div>
+  </section>
+
+  <!-- ============ 9. ACTIVITY (3:00 timer) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="act">
+      <div class="act-main">
+        <div class="eyebrow reveal" data-edit>Game Time</div>
+        <h2 class="title reveal d1" data-edit>Activity</h2>
+        <div class="dash reveal d1"></div>
+        <p class="body reveal d2" data-edit style="margin-top:30px;font-size:32px;max-width:840px;">Today we will play a small game —</p>
+        <p class="reveal d2" data-edit style="margin-top:18px;font-size:56px;font-weight:600;letter-spacing:-.015em;line-height:1.15;max-width:880px;">“Chart Paper Cuttings<br>and Assembly”</p>
+        <div class="callout reveal d3" data-edit>Cut. Mix. Hunt. Rebuild. Your team's <b>rank on the leaderboard</b> depends on it.</div>
+      </div>
+      <div class="act-side">
+        <div class="ph-card reveal d3" style="height:560px;">
+          <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <g stroke="#1A1A1A" stroke-width="4" stroke-linejoin="round">
+              <rect x="30" y="40" width="150" height="190" rx="8" fill="#FFFFFF"/>
+              <path d="M55,80 l100,0 M55,110 l70,0" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="105" cy="175" r="34" fill="#F7C948"/>
+              <path d="M210,130 h44" stroke="#979797" stroke-width="4"/>
+              <path d="M264,130 l-20,-13 v26 z" fill="#979797" stroke="none"/>
+              <polygon points="300,60 350,60 325,100" fill="#F5A8C7"/>
+              <rect x="360" y="55" width="46" height="46" rx="6" fill="#7ED9A2" transform="rotate(12 383 78)"/>
+              <circle cx="325" cy="160" r="26" fill="#8DA4E8"/>
+              <polygon points="370,190 415,150 420,205" fill="#F7C948"/>
+              <path d="M290,220 q30,18 60,0" fill="none" stroke-width="4" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Activity</span><span>09</span></div>
+  </section>
+
+  <!-- ============ 10. GAME INFORMATION (2:00 per team) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="act">
+      <div class="act-main">
+        <div class="eyebrow reveal" data-edit>How It Works</div>
+        <h2 class="title reveal d1" data-edit>Game Information</h2>
+        <div class="dash reveal d1"></div>
+        <ol class="act-list alpha reveal d2" style="margin-top:36px;">
+          <li data-edit>Each team gets <b>one magazine paper</b>. Cut it into <b>15 different shapes</b>.</li>
+          <li data-edit>After cutting, the <b>team leader</b> comes to the table and drops the shapes into the <b>different boxes</b>.</li>
+          <li data-edit>Put <b>at least 1 shape in each box</b> — that covers 10 boxes. The remaining <b>5 shapes</b> go into any boxes you like.</li>
+          <li data-edit>There will be activities <b>every day</b> — your team's <b>rank</b> is displayed and changes daily, based on performance.</li>
+        </ol>
+      </div>
+      <div class="act-side">
+        <div class="timer reveal d2" data-seconds="180" aria-label="3 minute per-team timer">
+          <div class="timer-cap"><span>Timer</span><span class="set">Set 03:00</span></div>
+          <div class="timer-display">3:00</div>
+          <div class="timer-state"></div>
+          <div class="timer-note" data-edit><b>3 minutes per team</b> at the boxes — reset the clock as each leader steps up.</div>
+          <div class="timer-btns"><button class="t-toggle">Start</button><button class="t-reset">Reset</button></div>
+          <div class="timer-hint">Space = start / pause · chime at zero</div>
+        </div>
+        <div class="ph-card reveal d3" style="height:300px;">
+          <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <g stroke="#1A1A1A" stroke-width="4" stroke-linejoin="round" font-family="Switzer,sans-serif">
+              <!-- boxes row -->
+              <g>
+                <rect x="30" y="150" width="76" height="64" rx="8" fill="#FFFFFF"/>
+                <rect x="122" y="150" width="76" height="64" rx="8" fill="#FFFFFF"/>
+                <rect x="214" y="150" width="76" height="64" rx="8" fill="#FFFFFF"/>
+                <rect x="306" y="150" width="76" height="64" rx="8" fill="#FFFFFF"/>
+                <text x="68" y="192" font-size="24" font-weight="600" text-anchor="middle" stroke="none" fill="#979797">1</text>
+                <text x="160" y="192" font-size="24" font-weight="600" text-anchor="middle" stroke="none" fill="#979797">2</text>
+                <text x="252" y="192" font-size="24" font-weight="600" text-anchor="middle" stroke="none" fill="#979797">3</text>
+                <text x="344" y="192" font-size="24" font-weight="600" text-anchor="middle" stroke="none" fill="#979797">…10</text>
+              </g>
+              <!-- shapes dropping -->
+              <polygon points="60,50 96,50 78,82" fill="#F5A8C7"/>
+              <circle cx="170" cy="66" r="20" fill="#F7C948"/>
+              <rect x="240" y="46" width="38" height="38" rx="5" fill="#7ED9A2" transform="rotate(10 259 65)"/>
+              <polygon points="330,44 362,60 348,90 316,78" fill="#8DA4E8"/>
+              <path d="M78,92 v40 M170,96 v36 M259,94 v38 M340,98 v34" stroke="#979797" stroke-width="4" stroke-dasharray="3 10" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Game info</span><span>10</span></div>
+  </section>
+
+  <!-- ============ 11. PICK A BOX (2:00 per team) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="act">
+      <div class="act-main">
+        <div class="eyebrow reveal" data-edit>Round 2 · The Draw</div>
+        <h2 class="title sm reveal d1" data-edit>Pick any one box you like</h2>
+        <div class="dash reveal d1"></div>
+        <div class="eyebrow muted reveal d2" style="margin-top:44px;">Rules</div>
+        <ol class="act-list alpha reveal d2" style="margin-top:22px;">
+          <li data-edit><b>Any one member</b> from the team comes up to pick a box — <b>but not the team leader</b>.</li>
+        </ol>
+        <div class="callout reveal d3" data-edit>The box you carry back is <b>not your own shapes</b> — that's the point. Hold on to it.</div>
+      </div>
+      <div class="act-side">
+        <div class="timer reveal d2" data-seconds="120" aria-label="2 minute box-picking timer">
+          <div class="timer-cap"><span>Timer</span><span class="set">Set 02:00</span></div>
+          <div class="timer-display">2:00</div>
+          <div class="timer-state"></div>
+          <div class="timer-note" data-edit><b>2 minutes per team</b> to pick a box — reset between teams.</div>
+          <div class="timer-btns"><button class="t-toggle">Start</button><button class="t-reset">Reset</button></div>
+          <div class="timer-hint">Space = start / pause · chime at zero</div>
+        </div>
+        <div class="ph-card reveal d3" style="height:300px;">
+          <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <g stroke="#1A1A1A" stroke-width="4" stroke-linejoin="round">
+              <rect x="150" y="90" width="140" height="110" rx="10" fill="#3062DC"/>
+              <path d="M150,120 h140" stroke="#FFFFFF" stroke-width="4"/>
+              <path d="M205,90 v-26 a15,15 0 0 1 30,0 v26" fill="none" stroke-width="5"/>
+              <text x="220" y="172" font-family="Switzer,sans-serif" font-size="30" font-weight="600" text-anchor="middle" stroke="none" fill="#FFFFFF">?</text>
+              <rect x="40" y="120" width="80" height="80" rx="9" fill="#FFFFFF"/>
+              <rect x="320" y="120" width="80" height="80" rx="9" fill="#FFFFFF"/>
+              <path d="M64,90 l16,20 M96,84 l6,24" stroke-width="4" stroke-linecap="round"/>
+              <path d="M376,90 l-16,20 M344,84 l-6,24" stroke-width="4" stroke-linecap="round"/>
+              <text x="220" y="242" font-family="Switzer,sans-serif" font-size="24" font-weight="600" letter-spacing="3" text-anchor="middle" stroke="none" fill="#979797">NOT THE LEADER</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Pick a box</span><span>11</span></div>
+  </section>
+
+  <!-- ============ 12. REFORM THE SHEET ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="pad" style="display:grid;grid-template-columns:1fr 680px;gap:70px;align-items:center;">
+      <div>
+        <div class="eyebrow reveal" data-edit>Final Round · The Hunt</div>
+        <h2 class="title sm reveal d1" data-edit>Reform your original magazine sheet</h2>
+        <div class="dash reveal d1"></div>
+        <ol class="act-list alpha reveal d2" style="margin-top:36px;">
+          <li data-edit>Go to <b>each team</b> — search and <b>request</b> for your shapes.</li>
+          <li data-edit><b>Collect every shape</b> and put your <b>original magazine sheet</b> back together.</li>
+          <li data-edit>The team that completes first is <b>Rank 1</b> — and the list goes till <b>Rank 10</b>.</li>
+        </ol>
+        <div class="callout reveal d3" data-edit>Ask politely, trade smartly — <b>every team is holding someone's pieces.</b></div>
+      </div>
+      <div class="ph-card reveal d2" style="height:680px;">
+        <svg viewBox="0 0 560 620" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <g stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+            <!-- scattered pieces top -->
+            <polygon points="80,60 130,60 105,100" fill="#F5A8C7" transform="rotate(-10 105 80)"/>
+            <circle cx="220" cy="70" r="24" fill="#F7C948"/>
+            <rect x="300" y="50" width="46" height="46" rx="6" fill="#7ED9A2" transform="rotate(14 323 73)"/>
+            <polygon points="420,50 470,66 452,104 410,90" fill="#8DA4E8"/>
+            <!-- converging arrows -->
+            <path d="M110,120 C150,200 200,240 250,270" fill="none" stroke="#3062DC" stroke-width="6" stroke-dasharray="14 12"/>
+            <path d="M250,270 l-24,-6 14,-19 z" fill="#3062DC" stroke="none"/>
+            <path d="M450,120 C410,200 370,240 320,270" fill="none" stroke="#3062DC" stroke-width="6" stroke-dasharray="14 12"/>
+            <path d="M320,270 l24,-6 -14,-19 z" fill="#3062DC" stroke="none"/>
+            <!-- rebuilt sheet -->
+            <g transform="translate(150,300)">
+              <rect x="0" y="0" width="260" height="240" rx="10" fill="#FFFFFF"/>
+              <path d="M0,80 h260 M0,160 h150 M90,0 v80 M180,0 v80 M150,80 v160" stroke="#3062DC" stroke-width="4" stroke-dasharray="10 9" fill="none"/>
+              <polygon points="10,90 80,90 45,150" fill="#F5A8C7" opacity=".9"/>
+              <circle cx="205" cy="120" r="26" fill="#F7C948" opacity=".9"/>
+              <rect x="30" y="170" width="44" height="44" rx="5" fill="#7ED9A2" opacity=".9"/>
+            </g>
+            <text x="280" y="592" font-family="Switzer,sans-serif" font-size="26" font-weight="600" letter-spacing="3" fill="#979797" text-anchor="middle" stroke="none">EVERY PIECE COMES HOME</text>
+          </g>
+        </svg>
+      </div>
+      <div class="footline"><span><i class="fdash"></i><b>Bridge Course</b> · Reassembly</span><span>12</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 13. WINNER ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="winner-wrap">
+      <svg class="trophy reveal" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <g stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round">
+          <path d="M55,30 h80 v40 a40,40 0 0 1 -80,0 Z" fill="#F7C948"/>
+          <path d="M55,38 h-22 a22,22 0 0 0 22,30 M135,38 h22 a22,22 0 0 1 -22,30" fill="none"/>
+          <path d="M87,108 h16 v22 h-16 Z" fill="#F7C948"/>
+          <rect x="63" y="130" width="64" height="18" rx="6" fill="#3062DC"/>
+          <rect x="53" y="148" width="84" height="16" rx="6" fill="#262626"/>
+          <path d="M95,44 l7,14 16,2 -12,11 3,16 -14,-8 -14,8 3,-16 -12,-11 16,-2 z" fill="#FFFFFF" stroke-width="4"/>
+        </g>
+      </svg>
+      <h2 class="display reveal d1" data-edit>Winner</h2>
+      <div class="dash reveal d1"></div>
+      <p class="sub reveal d2" data-edit>The team which completes first is <b>Rank&nbsp;1</b> — and the list goes till the <b>10th&nbsp;rank</b>.</p>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Winner</span><span>13</span></div>
+  </section>
+
+  <!-- ============ 14. RANKERS LIST (interactive) ============ -->
+  <section class="slide">
+    <div class="brand" data-edit>Bridge Course<span>Day-1 · Design Thinking</span></div>
+    <div class="rank-grid">
+      <div>
+        <div class="eyebrow reveal" data-edit>Day-1 Results</div>
+        <h2 class="title sm reveal d1" data-edit>Rankers List</h2>
+        <div class="dash reveal d1"></div>
+        <p class="body reveal d2" data-edit style="margin-top:22px;max-width:740px;">Tap the teams <strong>in the order they finished</strong>. Rank&nbsp;1 earns <strong>10&nbsp;points</strong>, sliding down to <strong>1&nbsp;point</strong> for Rank&nbsp;10.</p>
+        <div class="pool reveal d3" id="pool">
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 1</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 2</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 3</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 4</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 5</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 6</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 7</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 8</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 9</span><span class="rk"></span></button>
+          <button class="team-chip"><span class="dot"></span><span class="nm" data-edit>Team 10</span><span class="rk"></span></button>
+        </div>
+        <div class="rank-btns reveal d4"><button id="undoRank">↩ Undo last</button><button id="resetRank">Reset board</button></div>
+      </div>
+      <div class="board reveal d2">
+        <div class="bh"><span>Leaderboard</span><span>10 pts max · 1 pt least</span></div>
+        <ol id="rankList"></ol>
+        <p class="empty" id="rankEmpty">No ranks yet — tap the first team to finish, and the board fills in live.</p>
+      </div>
+    </div>
+    <div class="footline" style="z-index:2;"><span><i class="fdash"></i><b>Bridge Course</b> · Rankers list</span><span>14</span></div>
+  </section>
+
+</main>
+</div>
+
+<div class="chrome counter"><b id="cur">1</b> / <span id="tot">14</span></div>
+<div class="chrome nav"><button id="prev" aria-label="Previous">‹</button><button id="next" aria-label="Next">›</button></div>
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+<div class="edit-banner">Edit mode — click any text · Ctrl+S to save</div>
+
+<script>
+/* ===========================================
+   SLIDE CONTROLLER
+   =========================================== */
+class Deck{
+  constructor(){
+    this.slides=[...document.querySelectorAll('.slide')];
+    this.stage=document.getElementById('deckStage');this.i=0;
+    document.getElementById('tot').textContent=this.slides.length;
+    this.slides.forEach((s,k)=>{const fn=s.querySelector('.footline span:last-child');if(fn)fn.textContent=String(k+1).padStart(2,'0');});
+    this.scale();addEventListener('resize',()=>this.scale());this.keys();this.touch();
+    document.getElementById('next').onclick=()=>this.go(this.i+1);
+    document.getElementById('prev').onclick=()=>this.go(this.i-1);
+    this.show(0);
+  }
+  scale(){const f=Math.min(innerWidth/1920,innerHeight/1080);
+    this.stage.style.transform=`translate(${(innerWidth-1920*f)/2}px,${(innerHeight-1080*f)/2}px) scale(${f})`;}
+  show(n){this.i=Math.max(0,Math.min(n,this.slides.length-1));
+    this.slides.forEach((s,k)=>{const on=k===this.i;s.classList.toggle('active',on);s.classList.toggle('visible',on);
+      if(!on)s.querySelectorAll('.timer').forEach(t=>{if(t._ctl&&t._ctl.suspend)t._ctl.suspend();});});
+    document.getElementById('cur').textContent=this.i+1;
+    document.getElementById('progress').style.width=((this.i+1)/this.slides.length*100)+'%';}
+  go(n){this.show(n);}
+  activeTimer(){return this.slides[this.i].querySelector('.timer');}
+  keys(){addEventListener('keydown',e=>{
+    if(document.body.classList.contains('editing'))return;
+    if(e.target.isContentEditable)return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'){this.go(this.i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){this.go(this.i-1);}
+    else if(e.key===' '){const t=this.activeTimer();
+      if(t&&t._ctl&&!t.classList.contains('done')){e.preventDefault();t._ctl.toggle();}else{e.preventDefault();this.go(this.i+1);}}
+    else if(e.key==='Home'){this.go(0);}else if(e.key==='End'){this.go(this.slides.length-1);}
+  });}
+  touch(){let x0=null;
+    this.stage.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+    this.stage.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;
+      if(Math.abs(dx)>60)this.go(this.i+(dx<0?1:-1));x0=null;},{passive:true});}
+}
+
+/* ===========================================
+   REAL COUNTDOWN TIMER
+   =========================================== */
+function fmt(s){const m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
+let _ac=null;
+function tone(freq,dur){try{_ac=_ac||new (window.AudioContext||window.webkitAudioContext)();
+  if(_ac.state==='suspended')_ac.resume();
+  const a=_ac,o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type='sine';o.frequency.value=freq;
+  g.gain.setValueAtTime(.001,a.currentTime);g.gain.exponentialRampToValueAtTime(.35,a.currentTime+.02);
+  g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);o.start();o.stop(a.currentTime+dur+.02);}catch(e){}}
+function setupTimer(el){
+  const total=+el.dataset.seconds;
+  let rem=total, running=false, id=null;
+  const disp=el.querySelector('.timer-display');
+  const state=el.querySelector('.timer-state');
+  const toggle=el.querySelector('.t-toggle');
+  const reset=el.querySelector('.t-reset');
+  const warnAt=Math.max(10,Math.round(total*0.1));
+  const render=()=>{disp.textContent=fmt(rem);el.classList.toggle('warn',running&&rem<=warnAt&&rem>0);};
+  const stopTick=()=>{running=false;clearInterval(id);el.classList.remove('running');};
+  const tick=()=>{rem--;
+    if(rem<=0){rem=0;render();stopTick();el.classList.remove('warn');el.classList.add('done');
+      toggle.textContent='Done';state.textContent="Time's up";tone(880,.9);return;}
+    render();};
+  const start=()=>{if(running||rem<=0)return;running=true;el.classList.add('running');el.classList.remove('done');
+    toggle.textContent='Pause';state.textContent='Running';render();id=setInterval(tick,1000);};
+  const pause=()=>{stopTick();el.classList.remove('warn');toggle.textContent='Resume';state.textContent='Paused';};
+  el._ctl={toggle(){running?pause():start();},
+    suspend(){if(running)pause();},
+    reset(){stopTick();rem=total;el.classList.remove('done','warn');toggle.textContent='Start';state.textContent='';render();}};
+  toggle.onclick=()=>el._ctl.toggle();reset.onclick=()=>el._ctl.reset();
+  render();
+}
+
+/* ===========================================
+   ROW / TEAM VECTOR COLUMNS (slides 5 & 6)
+   stamped programmatically — 10 columns × 4 figures
+   =========================================== */
+function stampColumns(gid,mode){
+  const g=document.getElementById(gid);if(!g)return;
+  const NS='http://www.w3.org/2000/svg';
+  for(let i=0;i<10;i++){
+    const x=88+i*152, royal=i%2===0;
+    const col=document.createElementNS(NS,'g');
+    // badge
+    const badge=document.createElementNS(NS,'rect');
+    const bw=mode==='team'?128:64;
+    badge.setAttribute('x',x-bw/2);badge.setAttribute('y',20);badge.setAttribute('width',bw);badge.setAttribute('height',60);
+    badge.setAttribute('rx',14);badge.setAttribute('fill',royal?'#3062DC':'#262626');
+    col.appendChild(badge);
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',x);t.setAttribute('y',60);t.setAttribute('font-size',mode==='team'?26:30);
+    t.setAttribute('font-weight','600');t.setAttribute('fill','#FFFFFF');t.setAttribute('text-anchor','middle');
+    t.textContent=mode==='team'?('TEAM '+(i+1)):String(i+1);
+    col.appendChild(t);
+    // 4 figures standing behind each other
+    for(let j=0;j<4;j++){
+      const y=150+j*84;
+      const head=document.createElementNS(NS,'circle');
+      head.setAttribute('cx',x);head.setAttribute('cy',y);head.setAttribute('r',15);head.setAttribute('fill','#F3B98F');
+      const hair=document.createElementNS(NS,'path');
+      hair.setAttribute('d',`M${x-15},${y-3} A15,15 0 0 1 ${x+15},${y-3} Q${x+13},${y-19} ${x},${y-18} Q${x-13},${y-19} ${x-15},${y-3} Z`);
+      hair.setAttribute('fill','#1A1A1A');
+      const body=document.createElementNS(NS,'rect');
+      body.setAttribute('x',x-17);body.setAttribute('y',y+17);body.setAttribute('width',34);body.setAttribute('height',36);
+      body.setAttribute('rx',13);
+      body.setAttribute('fill',mode==='team'?(royal?'#3062DC':'#262626'):'#505050');
+      col.appendChild(body);col.appendChild(head);col.appendChild(hair);
+    }
+    g.appendChild(col);
+  }
+}
+
+/* ===========================================
+   REGION QR SWITCHER (slide 8)
+   Real QR codes pre-generated offline (qrcode lib, ECC-M, 45×45 modules),
+   embedded as compact SVG paths — click a region tab to swap the code.
+   =========================================== */
+const REGIONS=[{"key":"belagavi","label":"Belagavi Region","n":45,"d":"M0 0h7v1h-7zM8 0h1v1h-1zM12 0h1v1h-1zM19 0h1v1h-1zM21 0h2v1h-2zM25 0h1v1h-1zM27 0h1v1h-1zM29 0h5v1h-5zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM13 1h2v1h-2zM16 1h1v1h-1zM19 1h1v1h-1zM22 1h1v1h-1zM25 1h3v1h-3zM29 1h5v1h-5zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h2v1h-2zM14 2h2v1h-2zM17 2h4v1h-4zM22 2h4v1h-4zM31 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM12 3h2v1h-2zM18 3h3v1h-3zM22 3h2v1h-2zM25 3h1v1h-1zM29 3h3v1h-3zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM11 4h5v1h-5zM17 4h8v1h-8zM26 4h1v1h-1zM31 4h6v1h-6zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h3v1h-3zM14 5h2v1h-2zM17 5h4v1h-4zM24 5h1v1h-1zM30 5h4v1h-4zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h2v1h-2zM14 7h7v1h-7zM24 7h2v1h-2zM28 7h4v1h-4zM33 7h1v1h-1zM0 8h1v1h-1zM2 8h2v1h-2zM5 8h3v1h-3zM11 8h1v1h-1zM13 8h1v1h-1zM15 8h1v1h-1zM17 8h10v1h-10zM28 8h1v1h-1zM31 8h1v1h-1zM34 8h3v1h-3zM38 8h1v1h-1zM41 8h1v1h-1zM43 8h2v1h-2zM0 9h1v1h-1zM8 9h4v1h-4zM14 9h1v1h-1zM18 9h3v1h-3zM22 9h4v1h-4zM29 9h2v1h-2zM36 9h1v1h-1zM40 9h2v1h-2zM43 9h2v1h-2zM2 10h3v1h-3zM6 10h4v1h-4zM11 10h1v1h-1zM13 10h1v1h-1zM17 10h1v1h-1zM19 10h5v1h-5zM27 10h1v1h-1zM29 10h2v1h-2zM32 10h1v1h-1zM34 10h2v1h-2zM37 10h1v1h-1zM42 10h3v1h-3zM0 11h1v1h-1zM2 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM16 11h4v1h-4zM21 11h3v1h-3zM25 11h2v1h-2zM28 11h1v1h-1zM32 11h1v1h-1zM34 11h1v1h-1zM36 11h1v1h-1zM39 11h1v1h-1zM41 11h1v1h-1zM43 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h3v1h-3zM8 12h1v1h-1zM16 12h1v1h-1zM18 12h2v1h-2zM21 12h2v1h-2zM24 12h3v1h-3zM28 12h3v1h-3zM35 12h2v1h-2zM38 12h1v1h-1zM44 12h1v1h-1zM0 13h4v1h-4zM8 13h2v1h-2zM13 13h1v1h-1zM15 13h4v1h-4zM20 13h4v1h-4zM26 13h1v1h-1zM28 13h1v1h-1zM31 13h1v1h-1zM33 13h1v1h-1zM37 13h4v1h-4zM42 13h1v1h-1zM1 14h1v1h-1zM3 14h2v1h-2zM6 14h2v1h-2zM9 14h1v1h-1zM11 14h1v1h-1zM13 14h3v1h-3zM17 14h1v1h-1zM19 14h2v1h-2zM23 14h1v1h-1zM26 14h2v1h-2zM30 14h3v1h-3zM34 14h1v1h-1zM37 14h1v1h-1zM39 14h1v1h-1zM2 15h4v1h-4zM15 15h5v1h-5zM22 15h2v1h-2zM28 15h2v1h-2zM32 15h2v1h-2zM36 15h1v1h-1zM40 15h4v1h-4zM0 16h3v1h-3zM6 16h2v1h-2zM9 16h1v1h-1zM15 16h1v1h-1zM19 16h2v1h-2zM26 16h2v1h-2zM30 16h3v1h-3zM34 16h6v1h-6zM41 16h2v1h-2zM1 17h1v1h-1zM3 17h3v1h-3zM13 17h1v1h-1zM15 17h1v1h-1zM21 17h2v1h-2zM29 17h1v1h-1zM31 17h5v1h-5zM39 17h1v1h-1zM41 17h1v1h-1zM43 17h1v1h-1zM1 18h2v1h-2zM4 18h1v1h-1zM6 18h1v1h-1zM8 18h2v1h-2zM11 18h1v1h-1zM13 18h5v1h-5zM21 18h4v1h-4zM27 18h2v1h-2zM31 18h2v1h-2zM35 18h1v1h-1zM39 18h5v1h-5zM1 19h3v1h-3zM9 19h1v1h-1zM12 19h2v1h-2zM18 19h4v1h-4zM24 19h2v1h-2zM28 19h1v1h-1zM36 19h1v1h-1zM38 19h1v1h-1zM43 19h2v1h-2zM0 20h1v1h-1zM4 20h6v1h-6zM12 20h2v1h-2zM17 20h1v1h-1zM20 20h10v1h-10zM33 20h1v1h-1zM35 20h10v1h-10zM0 21h1v1h-1zM2 21h3v1h-3zM8 21h2v1h-2zM11 21h1v1h-1zM13 21h1v1h-1zM16 21h2v1h-2zM19 21h2v1h-2zM24 21h4v1h-4zM29 21h2v1h-2zM35 21h2v1h-2zM40 21h3v1h-3zM44 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM8 22h2v1h-2zM12 22h2v1h-2zM16 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h4v1h-4zM31 22h4v1h-4zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h2v1h-2zM44 22h1v1h-1zM1 23h1v1h-1zM4 23h1v1h-1zM8 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM15 23h3v1h-3zM20 23h1v1h-1zM24 23h2v1h-2zM29 23h1v1h-1zM33 23h1v1h-1zM36 23h1v1h-1zM40 23h2v1h-2zM43 23h1v1h-1zM2 24h8v1h-8zM14 24h2v1h-2zM18 24h1v1h-1zM20 24h7v1h-7zM29 24h1v1h-1zM31 24h1v1h-1zM34 24h8v1h-8zM43 24h1v1h-1zM0 25h1v1h-1zM3 25h2v1h-2zM7 25h2v1h-2zM11 25h1v1h-1zM15 25h1v1h-1zM19 25h1v1h-1zM22 25h2v1h-2zM25 25h2v1h-2zM29 25h1v1h-1zM31 25h3v1h-3zM36 25h1v1h-1zM39 25h1v1h-1zM1 26h2v1h-2zM4 26h3v1h-3zM8 26h2v1h-2zM12 26h1v1h-1zM14 26h2v1h-2zM18 26h2v1h-2zM21 26h2v1h-2zM24 26h4v1h-4zM29 26h4v1h-4zM35 26h1v1h-1zM39 26h3v1h-3zM0 27h3v1h-3zM4 27h1v1h-1zM8 27h2v1h-2zM11 27h1v1h-1zM14 27h2v1h-2zM17 27h3v1h-3zM24 27h2v1h-2zM27 27h1v1h-1zM29 27h1v1h-1zM34 27h2v1h-2zM38 27h2v1h-2zM42 27h1v1h-1zM44 27h1v1h-1zM2 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM12 28h2v1h-2zM16 28h2v1h-2zM20 28h1v1h-1zM25 28h1v1h-1zM29 28h1v1h-1zM31 28h2v1h-2zM35 28h1v1h-1zM39 28h5v1h-5zM0 29h1v1h-1zM2 29h4v1h-4zM9 29h3v1h-3zM15 29h1v1h-1zM17 29h1v1h-1zM19 29h3v1h-3zM23 29h2v1h-2zM27 29h1v1h-1zM29 29h1v1h-1zM31 29h1v1h-1zM33 29h2v1h-2zM36 29h9v1h-9zM1 30h2v1h-2zM4 30h4v1h-4zM9 30h1v1h-1zM11 30h3v1h-3zM18 30h2v1h-2zM24 30h1v1h-1zM26 30h1v1h-1zM31 30h1v1h-1zM39 30h1v1h-1zM41 30h1v1h-1zM43 30h1v1h-1zM0 31h1v1h-1zM3 31h2v1h-2zM7 31h1v1h-1zM9 31h1v1h-1zM11 31h1v1h-1zM13 31h2v1h-2zM17 31h1v1h-1zM19 31h1v1h-1zM21 31h1v1h-1zM24 31h3v1h-3zM30 31h1v1h-1zM36 31h1v1h-1zM0 32h1v1h-1zM3 32h1v1h-1zM5 32h4v1h-4zM10 32h1v1h-1zM13 32h4v1h-4zM20 32h3v1h-3zM24 32h1v1h-1zM27 32h5v1h-5zM34 32h1v1h-1zM36 32h2v1h-2zM42 32h1v1h-1zM1 33h2v1h-2zM7 33h1v1h-1zM9 33h1v1h-1zM11 33h1v1h-1zM13 33h2v1h-2zM20 33h2v1h-2zM23 33h1v1h-1zM25 33h1v1h-1zM28 33h5v1h-5zM36 33h2v1h-2zM41 33h3v1h-3zM4 34h1v1h-1zM6 34h1v1h-1zM10 34h4v1h-4zM15 34h1v1h-1zM17 34h2v1h-2zM24 34h1v1h-1zM26 34h1v1h-1zM29 34h2v1h-2zM32 34h1v1h-1zM37 34h2v1h-2zM40 34h1v1h-1zM42 34h3v1h-3zM1 35h4v1h-4zM7 35h1v1h-1zM9 35h4v1h-4zM14 35h1v1h-1zM18 35h1v1h-1zM21 35h2v1h-2zM25 35h1v1h-1zM28 35h2v1h-2zM31 35h2v1h-2zM34 35h2v1h-2zM37 35h1v1h-1zM39 35h3v1h-3zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h1v1h-1zM9 36h3v1h-3zM16 36h2v1h-2zM20 36h6v1h-6zM30 36h2v1h-2zM33 36h1v1h-1zM36 36h5v1h-5zM43 36h2v1h-2zM8 37h1v1h-1zM11 37h1v1h-1zM15 37h2v1h-2zM20 37h1v1h-1zM24 37h1v1h-1zM26 37h1v1h-1zM31 37h2v1h-2zM36 37h1v1h-1zM40 37h1v1h-1zM0 38h7v1h-7zM8 38h2v1h-2zM11 38h2v1h-2zM14 38h1v1h-1zM17 38h4v1h-4zM22 38h1v1h-1zM24 38h1v1h-1zM27 38h1v1h-1zM32 38h2v1h-2zM35 38h2v1h-2zM38 38h1v1h-1zM40 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM8 39h6v1h-6zM15 39h1v1h-1zM17 39h1v1h-1zM19 39h2v1h-2zM24 39h10v1h-10zM35 39h2v1h-2zM40 39h5v1h-5zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM9 40h7v1h-7zM17 40h2v1h-2zM20 40h6v1h-6zM27 40h1v1h-1zM31 40h4v1h-4zM36 40h5v1h-5zM42 40h2v1h-2zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM8 41h2v1h-2zM11 41h1v1h-1zM14 41h1v1h-1zM16 41h2v1h-2zM22 41h1v1h-1zM27 41h1v1h-1zM29 41h1v1h-1zM31 41h1v1h-1zM33 41h4v1h-4zM38 41h1v1h-1zM41 41h4v1h-4zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM8 42h1v1h-1zM10 42h1v1h-1zM14 42h2v1h-2zM26 42h1v1h-1zM31 42h1v1h-1zM34 42h1v1h-1zM36 42h1v1h-1zM41 42h1v1h-1zM43 42h1v1h-1zM0 43h1v1h-1zM6 43h1v1h-1zM10 43h1v1h-1zM12 43h1v1h-1zM14 43h1v1h-1zM16 43h1v1h-1zM19 43h1v1h-1zM21 43h6v1h-6zM28 43h1v1h-1zM30 43h1v1h-1zM37 43h5v1h-5zM44 43h1v1h-1zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h4v1h-4zM15 44h1v1h-1zM18 44h1v1h-1zM21 44h1v1h-1zM23 44h1v1h-1zM27 44h4v1h-4zM33 44h1v1h-1zM35 44h2v1h-2zM38 44h1v1h-1zM40 44h3v1h-3z"},{"key":"gokak","label":"Gokak Region","n":45,"d":"M0 0h7v1h-7zM8 0h2v1h-2zM12 0h1v1h-1zM15 0h1v1h-1zM17 0h1v1h-1zM20 0h3v1h-3zM26 0h5v1h-5zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM13 1h1v1h-1zM16 1h3v1h-3zM21 1h1v1h-1zM23 1h3v1h-3zM32 1h2v1h-2zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h4v1h-4zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h4v1h-4zM30 2h1v1h-1zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM11 3h1v1h-1zM15 3h1v1h-1zM17 3h1v1h-1zM19 3h3v1h-3zM24 3h2v1h-2zM28 3h2v1h-2zM31 3h1v1h-1zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM12 4h5v1h-5zM20 4h5v1h-5zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h5v1h-5zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM13 5h2v1h-2zM16 5h2v1h-2zM19 5h2v1h-2zM24 5h2v1h-2zM29 5h2v1h-2zM32 5h2v1h-2zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h2v1h-2zM11 7h1v1h-1zM15 7h6v1h-6zM24 7h4v1h-4zM31 7h1v1h-1zM34 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h5v1h-5zM13 8h1v1h-1zM16 8h2v1h-2zM19 8h7v1h-7zM29 8h2v1h-2zM32 8h1v1h-1zM37 8h5v1h-5zM44 8h1v1h-1zM0 9h5v1h-5zM8 9h3v1h-3zM12 9h2v1h-2zM15 9h1v1h-1zM18 9h1v1h-1zM26 9h2v1h-2zM29 9h2v1h-2zM32 9h2v1h-2zM35 9h7v1h-7zM0 10h7v1h-7zM9 10h1v1h-1zM15 10h1v1h-1zM17 10h1v1h-1zM19 10h1v1h-1zM21 10h2v1h-2zM26 10h1v1h-1zM28 10h4v1h-4zM33 10h1v1h-1zM35 10h1v1h-1zM37 10h4v1h-4zM42 10h2v1h-2zM0 11h1v1h-1zM2 11h1v1h-1zM4 11h2v1h-2zM7 11h1v1h-1zM11 11h2v1h-2zM14 11h2v1h-2zM18 11h1v1h-1zM22 11h2v1h-2zM25 11h1v1h-1zM27 11h1v1h-1zM29 11h1v1h-1zM32 11h4v1h-4zM37 11h1v1h-1zM0 12h2v1h-2zM4 12h3v1h-3zM9 12h1v1h-1zM13 12h1v1h-1zM15 12h1v1h-1zM18 12h1v1h-1zM20 12h1v1h-1zM22 12h5v1h-5zM32 12h2v1h-2zM35 12h3v1h-3zM39 12h1v1h-1zM43 12h1v1h-1zM1 13h5v1h-5zM11 13h2v1h-2zM15 13h1v1h-1zM19 13h6v1h-6zM26 13h1v1h-1zM29 13h2v1h-2zM32 13h2v1h-2zM35 13h2v1h-2zM38 13h3v1h-3zM43 13h1v1h-1zM0 14h2v1h-2zM4 14h3v1h-3zM10 14h1v1h-1zM12 14h1v1h-1zM14 14h1v1h-1zM17 14h1v1h-1zM19 14h2v1h-2zM26 14h2v1h-2zM29 14h2v1h-2zM33 14h3v1h-3zM41 14h3v1h-3zM1 15h1v1h-1zM3 15h1v1h-1zM8 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM17 15h3v1h-3zM22 15h1v1h-1zM25 15h2v1h-2zM28 15h1v1h-1zM30 15h1v1h-1zM32 15h2v1h-2zM35 15h1v1h-1zM37 15h1v1h-1zM39 15h3v1h-3zM43 15h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM12 16h2v1h-2zM18 16h1v1h-1zM20 16h3v1h-3zM24 16h2v1h-2zM27 16h1v1h-1zM29 16h1v1h-1zM32 16h1v1h-1zM38 16h2v1h-2zM41 16h1v1h-1zM43 16h1v1h-1zM1 17h3v1h-3zM5 17h1v1h-1zM7 17h2v1h-2zM10 17h4v1h-4zM15 17h3v1h-3zM19 17h3v1h-3zM26 17h1v1h-1zM28 17h4v1h-4zM33 17h1v1h-1zM35 17h2v1h-2zM38 17h2v1h-2zM41 17h2v1h-2zM0 18h1v1h-1zM2 18h2v1h-2zM6 18h2v1h-2zM12 18h2v1h-2zM15 18h1v1h-1zM18 18h1v1h-1zM21 18h1v1h-1zM23 18h1v1h-1zM28 18h7v1h-7zM36 18h1v1h-1zM38 18h1v1h-1zM40 18h1v1h-1zM43 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM5 19h1v1h-1zM8 19h1v1h-1zM10 19h1v1h-1zM12 19h1v1h-1zM15 19h1v1h-1zM18 19h2v1h-2zM22 19h2v1h-2zM25 19h1v1h-1zM29 19h1v1h-1zM31 19h4v1h-4zM36 19h1v1h-1zM39 19h2v1h-2zM43 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM4 20h7v1h-7zM13 20h1v1h-1zM15 20h1v1h-1zM17 20h8v1h-8zM26 20h1v1h-1zM30 20h1v1h-1zM32 20h10v1h-10zM43 20h1v1h-1zM0 21h5v1h-5zM8 21h5v1h-5zM14 21h1v1h-1zM16 21h2v1h-2zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h8v1h-8zM35 21h2v1h-2zM40 21h4v1h-4zM1 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM8 22h7v1h-7zM17 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h1v1h-1zM30 22h1v1h-1zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h2v1h-2zM1 23h1v1h-1zM3 23h2v1h-2zM8 23h1v1h-1zM11 23h2v1h-2zM15 23h2v1h-2zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h1v1h-1zM31 23h2v1h-2zM35 23h2v1h-2zM40 23h1v1h-1zM0 24h11v1h-11zM12 24h5v1h-5zM18 24h7v1h-7zM27 24h1v1h-1zM32 24h10v1h-10zM44 24h1v1h-1zM0 25h1v1h-1zM2 25h1v1h-1zM7 25h2v1h-2zM11 25h1v1h-1zM17 25h2v1h-2zM22 25h1v1h-1zM26 25h1v1h-1zM30 25h2v1h-2zM33 25h1v1h-1zM35 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM41 25h3v1h-3zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h4v1h-4zM11 26h1v1h-1zM13 26h1v1h-1zM16 26h1v1h-1zM22 26h3v1h-3zM26 26h1v1h-1zM29 26h3v1h-3zM33 26h1v1h-1zM36 26h2v1h-2zM40 26h1v1h-1zM43 26h1v1h-1zM7 27h1v1h-1zM9 27h2v1h-2zM12 27h2v1h-2zM15 27h1v1h-1zM19 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM30 27h3v1h-3zM36 27h1v1h-1zM38 27h4v1h-4zM44 27h1v1h-1zM0 28h5v1h-5zM6 28h2v1h-2zM9 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM16 28h6v1h-6zM23 28h2v1h-2zM26 28h2v1h-2zM30 28h3v1h-3zM37 28h1v1h-1zM39 28h2v1h-2zM44 28h1v1h-1zM5 29h1v1h-1zM7 29h1v1h-1zM10 29h1v1h-1zM13 29h3v1h-3zM19 29h1v1h-1zM23 29h1v1h-1zM26 29h5v1h-5zM33 29h1v1h-1zM35 29h1v1h-1zM37 29h1v1h-1zM39 29h1v1h-1zM42 29h2v1h-2zM0 30h2v1h-2zM5 30h2v1h-2zM10 30h2v1h-2zM14 30h1v1h-1zM18 30h2v1h-2zM21 30h1v1h-1zM24 30h1v1h-1zM26 30h5v1h-5zM34 30h3v1h-3zM39 30h5v1h-5zM1 31h2v1h-2zM10 31h1v1h-1zM13 31h1v1h-1zM15 31h1v1h-1zM19 31h4v1h-4zM26 31h3v1h-3zM30 31h1v1h-1zM32 31h3v1h-3zM36 31h1v1h-1zM38 31h3v1h-3zM44 31h1v1h-1zM1 32h2v1h-2zM6 32h3v1h-3zM10 32h3v1h-3zM15 32h1v1h-1zM18 32h1v1h-1zM20 32h2v1h-2zM23 32h5v1h-5zM29 32h1v1h-1zM31 32h3v1h-3zM37 32h2v1h-2zM40 32h3v1h-3zM44 32h1v1h-1zM0 33h1v1h-1zM2 33h1v1h-1zM4 33h1v1h-1zM7 33h3v1h-3zM12 33h1v1h-1zM15 33h4v1h-4zM22 33h1v1h-1zM26 33h2v1h-2zM29 33h2v1h-2zM36 33h1v1h-1zM38 33h2v1h-2zM41 33h3v1h-3zM4 34h1v1h-1zM6 34h2v1h-2zM9 34h1v1h-1zM11 34h1v1h-1zM14 34h1v1h-1zM16 34h3v1h-3zM20 34h3v1h-3zM24 34h1v1h-1zM26 34h1v1h-1zM28 34h3v1h-3zM37 34h1v1h-1zM39 34h1v1h-1zM42 34h2v1h-2zM1 35h4v1h-4zM7 35h1v1h-1zM9 35h1v1h-1zM16 35h1v1h-1zM20 35h2v1h-2zM23 35h1v1h-1zM25 35h1v1h-1zM27 35h1v1h-1zM29 35h6v1h-6zM40 35h1v1h-1zM44 35h1v1h-1zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM12 36h3v1h-3zM16 36h2v1h-2zM19 36h9v1h-9zM29 36h2v1h-2zM32 36h1v1h-1zM36 36h5v1h-5zM44 36h1v1h-1zM8 37h1v1h-1zM11 37h1v1h-1zM13 37h1v1h-1zM16 37h1v1h-1zM19 37h2v1h-2zM24 37h1v1h-1zM26 37h1v1h-1zM28 37h3v1h-3zM32 37h1v1h-1zM35 37h2v1h-2zM40 37h4v1h-4zM0 38h7v1h-7zM8 38h1v1h-1zM15 38h1v1h-1zM19 38h2v1h-2zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h2v1h-2zM30 38h3v1h-3zM36 38h1v1h-1zM38 38h1v1h-1zM40 38h2v1h-2zM43 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM17 39h1v1h-1zM19 39h2v1h-2zM24 39h4v1h-4zM30 39h5v1h-5zM36 39h1v1h-1zM40 39h1v1h-1zM43 39h2v1h-2zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM8 40h4v1h-4zM13 40h1v1h-1zM15 40h3v1h-3zM19 40h6v1h-6zM27 40h1v1h-1zM29 40h2v1h-2zM32 40h10v1h-10zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM9 41h7v1h-7zM19 41h2v1h-2zM23 41h2v1h-2zM26 41h3v1h-3zM30 41h1v1h-1zM33 41h1v1h-1zM35 41h1v1h-1zM37 41h5v1h-5zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM9 42h1v1h-1zM15 42h2v1h-2zM18 42h2v1h-2zM21 42h4v1h-4zM26 42h1v1h-1zM28 42h1v1h-1zM30 42h1v1h-1zM35 42h1v1h-1zM38 42h1v1h-1zM40 42h1v1h-1zM42 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM9 43h2v1h-2zM12 43h4v1h-4zM18 43h3v1h-3zM23 43h1v1h-1zM25 43h2v1h-2zM29 43h2v1h-2zM32 43h3v1h-3zM37 43h1v1h-1zM40 43h2v1h-2zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h2v1h-2zM15 44h1v1h-1zM17 44h1v1h-1zM20 44h8v1h-8zM29 44h2v1h-2zM32 44h4v1h-4zM37 44h1v1h-1zM40 44h2v1h-2zM44 44h1v1h-1z"},{"key":"chintamani","label":"Chintamani","n":45,"d":"M0 0h7v1h-7zM8 0h1v1h-1zM11 0h2v1h-2zM15 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM26 0h5v1h-5zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h3v1h-3zM16 1h1v1h-1zM18 1h1v1h-1zM23 1h5v1h-5zM32 1h2v1h-2zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h2v1h-2zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM30 2h1v1h-1zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h4v1h-4zM15 3h1v1h-1zM17 3h1v1h-1zM19 3h2v1h-2zM24 3h2v1h-2zM27 3h2v1h-2zM31 3h1v1h-1zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h3v1h-3zM12 4h3v1h-3zM16 4h1v1h-1zM20 4h5v1h-5zM26 4h2v1h-2zM29 4h2v1h-2zM32 4h5v1h-5zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM13 5h1v1h-1zM15 5h1v1h-1zM17 5h1v1h-1zM19 5h2v1h-2zM24 5h2v1h-2zM28 5h1v1h-1zM30 5h1v1h-1zM32 5h2v1h-2zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h2v1h-2zM11 7h1v1h-1zM14 7h2v1h-2zM17 7h4v1h-4zM24 7h4v1h-4zM30 7h1v1h-1zM34 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h5v1h-5zM14 8h4v1h-4zM19 8h7v1h-7zM30 8h1v1h-1zM32 8h1v1h-1zM35 8h1v1h-1zM37 8h5v1h-5zM44 8h1v1h-1zM0 9h3v1h-3zM9 9h2v1h-2zM12 9h2v1h-2zM18 9h1v1h-1zM21 9h2v1h-2zM26 9h2v1h-2zM29 9h3v1h-3zM33 9h1v1h-1zM36 9h6v1h-6zM2 10h1v1h-1zM4 10h1v1h-1zM6 10h1v1h-1zM9 10h1v1h-1zM14 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h2v1h-2zM26 10h1v1h-1zM28 10h6v1h-6zM37 10h4v1h-4zM42 10h2v1h-2zM0 11h1v1h-1zM2 11h4v1h-4zM7 11h1v1h-1zM11 11h3v1h-3zM18 11h1v1h-1zM22 11h2v1h-2zM27 11h1v1h-1zM29 11h1v1h-1zM32 11h3v1h-3zM37 11h1v1h-1zM4 12h3v1h-3zM8 12h2v1h-2zM12 12h4v1h-4zM18 12h1v1h-1zM20 12h2v1h-2zM23 12h2v1h-2zM26 12h1v1h-1zM31 12h3v1h-3zM35 12h3v1h-3zM39 12h1v1h-1zM43 12h1v1h-1zM0 13h1v1h-1zM2 13h4v1h-4zM8 13h1v1h-1zM12 13h4v1h-4zM19 13h4v1h-4zM26 13h1v1h-1zM29 13h2v1h-2zM32 13h2v1h-2zM35 13h2v1h-2zM38 13h3v1h-3zM42 13h2v1h-2zM0 14h2v1h-2zM4 14h6v1h-6zM12 14h1v1h-1zM14 14h1v1h-1zM17 14h1v1h-1zM19 14h1v1h-1zM27 14h1v1h-1zM29 14h2v1h-2zM33 14h3v1h-3zM41 14h1v1h-1zM43 14h1v1h-1zM1 15h1v1h-1zM3 15h1v1h-1zM8 15h2v1h-2zM12 15h1v1h-1zM15 15h1v1h-1zM18 15h2v1h-2zM22 15h1v1h-1zM24 15h3v1h-3zM30 15h1v1h-1zM32 15h1v1h-1zM34 15h2v1h-2zM40 15h1v1h-1zM43 15h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM11 16h1v1h-1zM13 16h1v1h-1zM17 16h2v1h-2zM20 16h4v1h-4zM26 16h1v1h-1zM29 16h1v1h-1zM32 16h2v1h-2zM38 16h2v1h-2zM43 16h1v1h-1zM1 17h3v1h-3zM5 17h1v1h-1zM7 17h2v1h-2zM12 17h2v1h-2zM15 17h3v1h-3zM19 17h3v1h-3zM23 17h1v1h-1zM26 17h2v1h-2zM29 17h3v1h-3zM33 17h1v1h-1zM35 17h4v1h-4zM41 17h2v1h-2zM0 18h1v1h-1zM2 18h2v1h-2zM6 18h2v1h-2zM10 18h4v1h-4zM15 18h1v1h-1zM18 18h4v1h-4zM25 18h1v1h-1zM27 18h1v1h-1zM29 18h4v1h-4zM36 18h3v1h-3zM40 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM4 19h2v1h-2zM8 19h2v1h-2zM15 19h1v1h-1zM18 19h2v1h-2zM22 19h2v1h-2zM25 19h1v1h-1zM27 19h1v1h-1zM29 19h1v1h-1zM31 19h4v1h-4zM36 19h1v1h-1zM39 19h2v1h-2zM43 19h1v1h-1zM0 20h1v1h-1zM2 20h8v1h-8zM13 20h1v1h-1zM15 20h10v1h-10zM26 20h2v1h-2zM32 20h10v1h-10zM43 20h2v1h-2zM0 21h2v1h-2zM3 21h2v1h-2zM8 21h1v1h-1zM11 21h2v1h-2zM14 21h1v1h-1zM16 21h2v1h-2zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h1v1h-1zM28 21h6v1h-6zM35 21h2v1h-2zM40 21h4v1h-4zM3 22h2v1h-2zM6 22h1v1h-1zM8 22h5v1h-5zM14 22h4v1h-4zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h5v1h-5zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h2v1h-2zM0 23h2v1h-2zM3 23h2v1h-2zM8 23h1v1h-1zM11 23h2v1h-2zM14 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h1v1h-1zM32 23h1v1h-1zM35 23h2v1h-2zM40 23h1v1h-1zM1 24h1v1h-1zM4 24h7v1h-7zM12 24h1v1h-1zM16 24h1v1h-1zM18 24h7v1h-7zM27 24h1v1h-1zM29 24h1v1h-1zM32 24h10v1h-10zM44 24h1v1h-1zM0 25h3v1h-3zM5 25h1v1h-1zM7 25h2v1h-2zM11 25h1v1h-1zM15 25h4v1h-4zM22 25h1v1h-1zM24 25h1v1h-1zM26 25h1v1h-1zM29 25h3v1h-3zM33 25h1v1h-1zM35 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM41 25h3v1h-3zM0 26h3v1h-3zM4 26h6v1h-6zM11 26h1v1h-1zM14 26h1v1h-1zM16 26h1v1h-1zM22 26h3v1h-3zM26 26h1v1h-1zM29 26h3v1h-3zM33 26h1v1h-1zM36 26h2v1h-2zM40 26h1v1h-1zM43 26h1v1h-1zM0 27h3v1h-3zM4 27h2v1h-2zM7 27h1v1h-1zM9 27h2v1h-2zM12 27h1v1h-1zM16 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM25 27h3v1h-3zM30 27h1v1h-1zM32 27h1v1h-1zM35 27h2v1h-2zM38 27h4v1h-4zM44 27h1v1h-1zM1 28h3v1h-3zM5 28h3v1h-3zM9 28h1v1h-1zM12 28h2v1h-2zM16 28h6v1h-6zM23 28h5v1h-5zM30 28h1v1h-1zM32 28h1v1h-1zM37 28h1v1h-1zM39 28h2v1h-2zM44 28h1v1h-1zM0 29h2v1h-2zM8 29h1v1h-1zM10 29h1v1h-1zM13 29h1v1h-1zM15 29h1v1h-1zM19 29h1v1h-1zM23 29h1v1h-1zM26 29h5v1h-5zM33 29h1v1h-1zM35 29h3v1h-3zM39 29h1v1h-1zM41 29h1v1h-1zM43 29h1v1h-1zM0 30h2v1h-2zM6 30h1v1h-1zM8 30h1v1h-1zM12 30h1v1h-1zM14 30h1v1h-1zM19 30h1v1h-1zM21 30h2v1h-2zM24 30h7v1h-7zM34 30h1v1h-1zM36 30h1v1h-1zM39 30h3v1h-3zM43 30h1v1h-1zM1 31h2v1h-2zM4 31h1v1h-1zM9 31h1v1h-1zM11 31h1v1h-1zM13 31h1v1h-1zM15 31h1v1h-1zM17 31h1v1h-1zM19 31h2v1h-2zM25 31h1v1h-1zM27 31h2v1h-2zM30 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM36 31h1v1h-1zM38 31h3v1h-3zM44 31h1v1h-1zM1 32h2v1h-2zM6 32h1v1h-1zM8 32h5v1h-5zM15 32h1v1h-1zM18 32h1v1h-1zM20 32h2v1h-2zM23 32h5v1h-5zM29 32h1v1h-1zM31 32h2v1h-2zM34 32h1v1h-1zM37 32h2v1h-2zM40 32h2v1h-2zM44 32h1v1h-1zM0 33h1v1h-1zM2 33h1v1h-1zM4 33h1v1h-1zM10 33h3v1h-3zM15 33h5v1h-5zM22 33h1v1h-1zM25 33h3v1h-3zM29 33h2v1h-2zM33 33h1v1h-1zM36 33h1v1h-1zM38 33h2v1h-2zM41 33h2v1h-2zM44 33h1v1h-1zM4 34h1v1h-1zM6 34h1v1h-1zM8 34h4v1h-4zM14 34h1v1h-1zM16 34h1v1h-1zM20 34h8v1h-8zM29 34h2v1h-2zM33 34h1v1h-1zM37 34h1v1h-1zM39 34h1v1h-1zM42 34h2v1h-2zM1 35h4v1h-4zM16 35h1v1h-1zM21 35h1v1h-1zM25 35h1v1h-1zM27 35h8v1h-8zM40 35h1v1h-1zM43 35h2v1h-2zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM10 36h1v1h-1zM12 36h4v1h-4zM17 36h1v1h-1zM19 36h9v1h-9zM30 36h1v1h-1zM32 36h1v1h-1zM36 36h5v1h-5zM44 36h1v1h-1zM8 37h2v1h-2zM11 37h1v1h-1zM13 37h1v1h-1zM15 37h3v1h-3zM19 37h2v1h-2zM24 37h1v1h-1zM26 37h2v1h-2zM29 37h2v1h-2zM32 37h1v1h-1zM35 37h2v1h-2zM40 37h4v1h-4zM0 38h7v1h-7zM8 38h1v1h-1zM13 38h1v1h-1zM19 38h2v1h-2zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h1v1h-1zM29 38h4v1h-4zM36 38h1v1h-1zM38 38h1v1h-1zM40 38h2v1h-2zM43 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM13 39h1v1h-1zM15 39h3v1h-3zM19 39h2v1h-2zM24 39h4v1h-4zM29 39h2v1h-2zM32 39h3v1h-3zM36 39h1v1h-1zM40 39h1v1h-1zM43 39h2v1h-2zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM8 40h4v1h-4zM13 40h1v1h-1zM17 40h1v1h-1zM19 40h6v1h-6zM27 40h1v1h-1zM29 40h1v1h-1zM32 40h10v1h-10zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM9 41h4v1h-4zM15 41h2v1h-2zM19 41h2v1h-2zM23 41h2v1h-2zM26 41h3v1h-3zM30 41h1v1h-1zM32 41h2v1h-2zM35 41h1v1h-1zM37 41h5v1h-5zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM9 42h1v1h-1zM13 42h4v1h-4zM18 42h1v1h-1zM20 42h5v1h-5zM26 42h1v1h-1zM28 42h1v1h-1zM30 42h1v1h-1zM35 42h1v1h-1zM37 42h1v1h-1zM40 42h1v1h-1zM42 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM9 43h2v1h-2zM12 43h3v1h-3zM16 43h1v1h-1zM18 43h3v1h-3zM25 43h1v1h-1zM29 43h2v1h-2zM32 43h3v1h-3zM37 43h1v1h-1zM39 43h3v1h-3zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h2v1h-2zM13 44h3v1h-3zM17 44h1v1h-1zM20 44h5v1h-5zM27 44h1v1h-1zM29 44h2v1h-2zM32 44h4v1h-4zM37 44h1v1h-1zM40 44h2v1h-2zM44 44h1v1h-1z"},{"key":"muddenahalli","label":"Muddenahalli","n":45,"d":"M0 0h7v1h-7zM8 0h2v1h-2zM15 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM22 0h1v1h-1zM26 0h1v1h-1zM29 0h2v1h-2zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h4v1h-4zM16 1h1v1h-1zM18 1h2v1h-2zM21 1h1v1h-1zM23 1h3v1h-3zM28 1h1v1h-1zM32 1h2v1h-2zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM29 2h2v1h-2zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h2v1h-2zM15 3h3v1h-3zM19 3h4v1h-4zM24 3h2v1h-2zM28 3h2v1h-2zM31 3h1v1h-1zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM12 4h4v1h-4zM20 4h5v1h-5zM26 4h5v1h-5zM32 4h5v1h-5zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM13 5h1v1h-1zM17 5h1v1h-1zM19 5h2v1h-2zM24 5h2v1h-2zM28 5h1v1h-1zM32 5h2v1h-2zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h2v1h-2zM11 7h1v1h-1zM13 7h1v1h-1zM16 7h5v1h-5zM24 7h4v1h-4zM30 7h2v1h-2zM34 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h5v1h-5zM15 8h1v1h-1zM17 8h1v1h-1zM19 8h7v1h-7zM29 8h1v1h-1zM32 8h1v1h-1zM37 8h5v1h-5zM44 8h1v1h-1zM0 9h1v1h-1zM3 9h3v1h-3zM9 9h2v1h-2zM12 9h1v1h-1zM15 9h2v1h-2zM18 9h1v1h-1zM21 9h2v1h-2zM26 9h2v1h-2zM29 9h2v1h-2zM33 9h1v1h-1zM36 9h6v1h-6zM2 10h2v1h-2zM6 10h2v1h-2zM9 10h1v1h-1zM13 10h1v1h-1zM17 10h1v1h-1zM19 10h1v1h-1zM22 10h1v1h-1zM26 10h1v1h-1zM28 10h2v1h-2zM31 10h3v1h-3zM35 10h1v1h-1zM37 10h4v1h-4zM42 10h2v1h-2zM1 11h1v1h-1zM3 11h3v1h-3zM11 11h4v1h-4zM18 11h1v1h-1zM21 11h3v1h-3zM27 11h1v1h-1zM29 11h1v1h-1zM33 11h5v1h-5zM0 12h2v1h-2zM4 12h6v1h-6zM13 12h3v1h-3zM18 12h1v1h-1zM20 12h5v1h-5zM26 12h1v1h-1zM32 12h2v1h-2zM35 12h3v1h-3zM39 12h1v1h-1zM43 12h1v1h-1zM2 13h4v1h-4zM7 13h2v1h-2zM12 13h2v1h-2zM15 13h1v1h-1zM19 13h4v1h-4zM26 13h1v1h-1zM29 13h3v1h-3zM33 13h1v1h-1zM35 13h2v1h-2zM38 13h6v1h-6zM0 14h2v1h-2zM4 14h3v1h-3zM8 14h1v1h-1zM14 14h1v1h-1zM17 14h1v1h-1zM23 14h1v1h-1zM26 14h2v1h-2zM29 14h3v1h-3zM33 14h3v1h-3zM43 14h1v1h-1zM1 15h1v1h-1zM3 15h1v1h-1zM8 15h1v1h-1zM11 15h2v1h-2zM15 15h1v1h-1zM18 15h2v1h-2zM22 15h1v1h-1zM26 15h1v1h-1zM30 15h1v1h-1zM32 15h1v1h-1zM35 15h1v1h-1zM37 15h1v1h-1zM39 15h1v1h-1zM43 15h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM12 16h2v1h-2zM17 16h3v1h-3zM21 16h4v1h-4zM29 16h1v1h-1zM32 16h2v1h-2zM37 16h3v1h-3zM41 16h1v1h-1zM43 16h1v1h-1zM1 17h3v1h-3zM5 17h1v1h-1zM7 17h2v1h-2zM12 17h2v1h-2zM15 17h2v1h-2zM18 17h4v1h-4zM24 17h1v1h-1zM26 17h1v1h-1zM28 17h4v1h-4zM33 17h1v1h-1zM35 17h2v1h-2zM38 17h7v1h-7zM0 18h1v1h-1zM2 18h2v1h-2zM6 18h2v1h-2zM10 18h2v1h-2zM13 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM20 18h2v1h-2zM28 18h7v1h-7zM36 18h1v1h-1zM40 18h1v1h-1zM43 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM4 19h1v1h-1zM8 19h1v1h-1zM12 19h1v1h-1zM15 19h1v1h-1zM18 19h2v1h-2zM22 19h1v1h-1zM24 19h2v1h-2zM27 19h1v1h-1zM29 19h6v1h-6zM36 19h1v1h-1zM39 19h2v1h-2zM0 20h1v1h-1zM2 20h7v1h-7zM13 20h1v1h-1zM17 20h2v1h-2zM20 20h5v1h-5zM26 20h2v1h-2zM29 20h1v1h-1zM32 20h10v1h-10zM44 20h1v1h-1zM0 21h2v1h-2zM3 21h2v1h-2zM8 21h1v1h-1zM11 21h2v1h-2zM14 21h2v1h-2zM17 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h8v1h-8zM35 21h2v1h-2zM40 21h4v1h-4zM3 22h2v1h-2zM6 22h1v1h-1zM8 22h5v1h-5zM14 22h1v1h-1zM17 22h1v1h-1zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h2v1h-2zM29 22h1v1h-1zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h2v1h-2zM2 23h3v1h-3zM8 23h1v1h-1zM11 23h5v1h-5zM20 23h1v1h-1zM24 23h1v1h-1zM27 23h1v1h-1zM29 23h2v1h-2zM35 23h2v1h-2zM40 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM4 24h7v1h-7zM12 24h2v1h-2zM15 24h2v1h-2zM18 24h7v1h-7zM27 24h1v1h-1zM30 24h1v1h-1zM32 24h10v1h-10zM44 24h1v1h-1zM1 25h4v1h-4zM7 25h2v1h-2zM11 25h1v1h-1zM16 25h3v1h-3zM22 25h2v1h-2zM26 25h1v1h-1zM29 25h3v1h-3zM33 25h1v1h-1zM35 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM41 25h3v1h-3zM0 26h2v1h-2zM4 26h1v1h-1zM6 26h4v1h-4zM11 26h1v1h-1zM15 26h1v1h-1zM22 26h3v1h-3zM26 26h1v1h-1zM29 26h1v1h-1zM33 26h1v1h-1zM37 26h1v1h-1zM40 26h1v1h-1zM43 26h1v1h-1zM1 27h1v1h-1zM5 27h1v1h-1zM7 27h1v1h-1zM9 27h2v1h-2zM12 27h3v1h-3zM16 27h1v1h-1zM19 27h1v1h-1zM22 27h2v1h-2zM27 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM36 27h1v1h-1zM38 27h4v1h-4zM44 27h1v1h-1zM2 28h2v1h-2zM5 28h3v1h-3zM9 28h1v1h-1zM12 28h3v1h-3zM16 28h6v1h-6zM23 28h2v1h-2zM27 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM37 28h1v1h-1zM39 28h2v1h-2zM44 28h1v1h-1zM1 29h1v1h-1zM4 29h1v1h-1zM10 29h1v1h-1zM12 29h1v1h-1zM15 29h1v1h-1zM19 29h1v1h-1zM23 29h1v1h-1zM26 29h5v1h-5zM33 29h1v1h-1zM36 29h2v1h-2zM39 29h1v1h-1zM43 29h1v1h-1zM0 30h2v1h-2zM4 30h3v1h-3zM8 30h2v1h-2zM14 30h1v1h-1zM18 30h2v1h-2zM21 30h1v1h-1zM24 30h7v1h-7zM34 30h3v1h-3zM39 30h2v1h-2zM43 30h1v1h-1zM1 31h2v1h-2zM8 31h1v1h-1zM12 31h2v1h-2zM15 31h1v1h-1zM17 31h6v1h-6zM26 31h1v1h-1zM30 31h1v1h-1zM32 31h2v1h-2zM36 31h1v1h-1zM38 31h3v1h-3zM44 31h1v1h-1zM1 32h2v1h-2zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h2v1h-2zM15 32h1v1h-1zM17 32h1v1h-1zM20 32h2v1h-2zM23 32h2v1h-2zM26 32h1v1h-1zM29 32h1v1h-1zM31 32h3v1h-3zM37 32h2v1h-2zM40 32h3v1h-3zM44 32h1v1h-1zM0 33h1v1h-1zM2 33h1v1h-1zM4 33h1v1h-1zM7 33h3v1h-3zM11 33h2v1h-2zM15 33h2v1h-2zM26 33h1v1h-1zM28 33h3v1h-3zM33 33h1v1h-1zM36 33h1v1h-1zM38 33h2v1h-2zM41 33h4v1h-4zM4 34h1v1h-1zM6 34h1v1h-1zM8 34h2v1h-2zM11 34h2v1h-2zM14 34h1v1h-1zM16 34h1v1h-1zM18 34h1v1h-1zM20 34h6v1h-6zM27 34h4v1h-4zM33 34h1v1h-1zM37 34h1v1h-1zM39 34h1v1h-1zM42 34h2v1h-2zM1 35h4v1h-4zM7 35h3v1h-3zM11 35h2v1h-2zM16 35h1v1h-1zM18 35h1v1h-1zM21 35h1v1h-1zM25 35h1v1h-1zM27 35h1v1h-1zM29 35h6v1h-6zM40 35h1v1h-1zM43 35h2v1h-2zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM10 36h1v1h-1zM12 36h3v1h-3zM17 36h1v1h-1zM19 36h9v1h-9zM30 36h1v1h-1zM32 36h1v1h-1zM36 36h5v1h-5zM44 36h1v1h-1zM8 37h1v1h-1zM11 37h1v1h-1zM13 37h1v1h-1zM16 37h1v1h-1zM19 37h2v1h-2zM24 37h1v1h-1zM26 37h2v1h-2zM29 37h2v1h-2zM32 37h1v1h-1zM35 37h2v1h-2zM40 37h4v1h-4zM0 38h7v1h-7zM8 38h1v1h-1zM16 38h1v1h-1zM20 38h1v1h-1zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h1v1h-1zM29 38h4v1h-4zM36 38h1v1h-1zM38 38h1v1h-1zM40 38h2v1h-2zM43 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM15 39h3v1h-3zM19 39h2v1h-2zM24 39h4v1h-4zM29 39h1v1h-1zM31 39h4v1h-4zM36 39h1v1h-1zM40 39h1v1h-1zM43 39h2v1h-2zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM8 40h4v1h-4zM14 40h1v1h-1zM16 40h2v1h-2zM19 40h6v1h-6zM27 40h1v1h-1zM29 40h2v1h-2zM32 40h10v1h-10zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM9 41h4v1h-4zM16 41h1v1h-1zM20 41h1v1h-1zM26 41h3v1h-3zM30 41h4v1h-4zM35 41h1v1h-1zM38 41h2v1h-2zM41 41h1v1h-1zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM9 42h1v1h-1zM13 42h1v1h-1zM15 42h2v1h-2zM18 42h6v1h-6zM26 42h1v1h-1zM28 42h1v1h-1zM30 42h2v1h-2zM35 42h1v1h-1zM38 42h1v1h-1zM40 42h1v1h-1zM42 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM9 43h2v1h-2zM12 43h1v1h-1zM18 43h3v1h-3zM25 43h1v1h-1zM29 43h2v1h-2zM32 43h3v1h-3zM37 43h1v1h-1zM39 43h3v1h-3zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h4v1h-4zM15 44h1v1h-1zM17 44h1v1h-1zM20 44h6v1h-6zM27 44h1v1h-1zM29 44h2v1h-2zM32 44h4v1h-4zM39 44h1v1h-1zM41 44h1v1h-1zM44 44h1v1h-1z"},{"key":"davanagere","label":"Davanagere","n":45,"d":"M0 0h7v1h-7zM9 0h1v1h-1zM11 0h1v1h-1zM16 0h2v1h-2zM20 0h4v1h-4zM26 0h1v1h-1zM30 0h1v1h-1zM33 0h1v1h-1zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM12 1h1v1h-1zM14 1h1v1h-1zM16 1h1v1h-1zM18 1h2v1h-2zM21 1h4v1h-4zM31 1h1v1h-1zM33 1h1v1h-1zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM14 2h1v1h-1zM17 2h3v1h-3zM23 2h1v1h-1zM25 2h2v1h-2zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h3v1h-3zM12 3h1v1h-1zM14 3h1v1h-1zM18 3h2v1h-2zM21 3h3v1h-3zM25 3h4v1h-4zM31 3h3v1h-3zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h1v1h-1zM19 4h7v1h-7zM27 4h1v1h-1zM30 4h2v1h-2zM34 4h3v1h-3zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM14 5h2v1h-2zM17 5h1v1h-1zM20 5h1v1h-1zM24 5h1v1h-1zM26 5h2v1h-2zM29 5h1v1h-1zM31 5h1v1h-1zM33 5h1v1h-1zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h1v1h-1zM10 7h1v1h-1zM12 7h1v1h-1zM15 7h1v1h-1zM19 7h2v1h-2zM24 7h3v1h-3zM28 7h1v1h-1zM30 7h1v1h-1zM33 7h1v1h-1zM35 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM13 8h1v1h-1zM15 8h1v1h-1zM17 8h1v1h-1zM20 8h5v1h-5zM26 8h2v1h-2zM29 8h1v1h-1zM31 8h1v1h-1zM33 8h1v1h-1zM37 8h2v1h-2zM41 8h3v1h-3zM1 9h1v1h-1zM3 9h2v1h-2zM7 9h3v1h-3zM12 9h4v1h-4zM18 9h2v1h-2zM22 9h1v1h-1zM25 9h7v1h-7zM33 9h4v1h-4zM38 9h2v1h-2zM41 9h1v1h-1zM43 9h1v1h-1zM1 10h2v1h-2zM5 10h2v1h-2zM8 10h6v1h-6zM16 10h1v1h-1zM18 10h2v1h-2zM21 10h4v1h-4zM26 10h1v1h-1zM29 10h1v1h-1zM31 10h1v1h-1zM33 10h2v1h-2zM36 10h4v1h-4zM41 10h1v1h-1zM43 10h1v1h-1zM0 11h4v1h-4zM7 11h4v1h-4zM13 11h2v1h-2zM17 11h1v1h-1zM21 11h1v1h-1zM24 11h1v1h-1zM28 11h1v1h-1zM30 11h1v1h-1zM35 11h3v1h-3zM39 11h4v1h-4zM0 12h1v1h-1zM3 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM12 12h3v1h-3zM16 12h3v1h-3zM20 12h1v1h-1zM24 12h2v1h-2zM27 12h3v1h-3zM32 12h1v1h-1zM34 12h1v1h-1zM36 12h2v1h-2zM40 12h2v1h-2zM43 12h1v1h-1zM3 13h3v1h-3zM12 13h4v1h-4zM21 13h2v1h-2zM25 13h1v1h-1zM29 13h5v1h-5zM35 13h3v1h-3zM39 13h4v1h-4zM44 13h1v1h-1zM1 14h1v1h-1zM6 14h1v1h-1zM8 14h3v1h-3zM14 14h1v1h-1zM16 14h1v1h-1zM18 14h1v1h-1zM22 14h3v1h-3zM27 14h2v1h-2zM31 14h1v1h-1zM33 14h1v1h-1zM36 14h1v1h-1zM40 14h4v1h-4zM0 15h3v1h-3zM5 15h1v1h-1zM9 15h4v1h-4zM14 15h1v1h-1zM19 15h4v1h-4zM25 15h5v1h-5zM36 15h1v1h-1zM39 15h6v1h-6zM1 16h4v1h-4zM6 16h3v1h-3zM10 16h3v1h-3zM14 16h2v1h-2zM17 16h4v1h-4zM22 16h1v1h-1zM24 16h2v1h-2zM29 16h1v1h-1zM31 16h1v1h-1zM33 16h1v1h-1zM37 16h1v1h-1zM41 16h2v1h-2zM44 16h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM14 17h4v1h-4zM19 17h1v1h-1zM21 17h1v1h-1zM23 17h1v1h-1zM28 17h3v1h-3zM32 17h1v1h-1zM35 17h3v1h-3zM41 17h4v1h-4zM1 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM8 18h2v1h-2zM11 18h2v1h-2zM14 18h2v1h-2zM19 18h3v1h-3zM24 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM38 18h2v1h-2zM42 18h3v1h-3zM2 19h2v1h-2zM8 19h5v1h-5zM16 19h2v1h-2zM19 19h1v1h-1zM21 19h1v1h-1zM23 19h3v1h-3zM28 19h1v1h-1zM31 19h2v1h-2zM35 19h1v1h-1zM41 19h3v1h-3zM0 20h2v1h-2zM4 20h6v1h-6zM14 20h1v1h-1zM16 20h3v1h-3zM20 20h6v1h-6zM30 20h2v1h-2zM34 20h8v1h-8zM44 20h1v1h-1zM0 21h1v1h-1zM2 21h3v1h-3zM8 21h1v1h-1zM10 21h5v1h-5zM16 21h2v1h-2zM19 21h2v1h-2zM24 21h3v1h-3zM28 21h3v1h-3zM32 21h5v1h-5zM40 21h3v1h-3zM1 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM8 22h2v1h-2zM14 22h2v1h-2zM18 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h5v1h-5zM34 22h3v1h-3zM38 22h1v1h-1zM40 22h1v1h-1zM42 22h1v1h-1zM4 23h1v1h-1zM8 23h3v1h-3zM13 23h6v1h-6zM20 23h1v1h-1zM24 23h1v1h-1zM28 23h3v1h-3zM33 23h2v1h-2zM36 23h1v1h-1zM40 23h3v1h-3zM1 24h1v1h-1zM4 24h5v1h-5zM11 24h2v1h-2zM16 24h9v1h-9zM28 24h3v1h-3zM32 24h1v1h-1zM36 24h5v1h-5zM44 24h1v1h-1zM1 25h5v1h-5zM11 25h1v1h-1zM13 25h2v1h-2zM16 25h5v1h-5zM22 25h1v1h-1zM25 25h1v1h-1zM30 25h4v1h-4zM35 25h1v1h-1zM38 25h2v1h-2zM41 25h2v1h-2zM44 25h1v1h-1zM0 26h2v1h-2zM3 26h1v1h-1zM6 26h5v1h-5zM12 26h1v1h-1zM14 26h1v1h-1zM17 26h2v1h-2zM21 26h2v1h-2zM26 26h1v1h-1zM28 26h2v1h-2zM33 26h3v1h-3zM37 26h1v1h-1zM41 26h3v1h-3zM0 27h6v1h-6zM7 27h2v1h-2zM10 27h2v1h-2zM15 27h6v1h-6zM24 27h3v1h-3zM29 27h1v1h-1zM31 27h1v1h-1zM33 27h1v1h-1zM35 27h1v1h-1zM40 27h1v1h-1zM42 27h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM13 28h6v1h-6zM23 28h2v1h-2zM26 28h1v1h-1zM30 28h1v1h-1zM33 28h1v1h-1zM36 28h1v1h-1zM38 28h1v1h-1zM40 28h1v1h-1zM43 28h1v1h-1zM1 29h2v1h-2zM5 29h1v1h-1zM8 29h1v1h-1zM10 29h4v1h-4zM15 29h1v1h-1zM20 29h1v1h-1zM23 29h1v1h-1zM25 29h1v1h-1zM27 29h7v1h-7zM35 29h1v1h-1zM38 29h2v1h-2zM41 29h2v1h-2zM44 29h1v1h-1zM2 30h1v1h-1zM5 30h4v1h-4zM11 30h1v1h-1zM13 30h1v1h-1zM17 30h1v1h-1zM20 30h3v1h-3zM27 30h3v1h-3zM31 30h2v1h-2zM34 30h2v1h-2zM37 30h4v1h-4zM44 30h1v1h-1zM0 31h4v1h-4zM5 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM16 31h1v1h-1zM19 31h6v1h-6zM27 31h3v1h-3zM32 31h2v1h-2zM35 31h1v1h-1zM38 31h1v1h-1zM41 31h2v1h-2zM44 31h1v1h-1zM3 32h1v1h-1zM6 32h1v1h-1zM9 32h1v1h-1zM11 32h1v1h-1zM13 32h2v1h-2zM19 32h2v1h-2zM23 32h2v1h-2zM26 32h1v1h-1zM29 32h1v1h-1zM33 32h2v1h-2zM39 32h5v1h-5zM0 33h3v1h-3zM7 33h1v1h-1zM9 33h1v1h-1zM11 33h1v1h-1zM13 33h1v1h-1zM15 33h1v1h-1zM18 33h1v1h-1zM25 33h2v1h-2zM28 33h4v1h-4zM33 33h2v1h-2zM36 33h8v1h-8zM4 34h1v1h-1zM6 34h3v1h-3zM12 34h1v1h-1zM14 34h1v1h-1zM21 34h1v1h-1zM23 34h1v1h-1zM26 34h1v1h-1zM33 34h5v1h-5zM39 34h3v1h-3zM1 35h4v1h-4zM7 35h1v1h-1zM9 35h1v1h-1zM12 35h1v1h-1zM15 35h1v1h-1zM17 35h1v1h-1zM19 35h1v1h-1zM22 35h1v1h-1zM24 35h2v1h-2zM28 35h1v1h-1zM30 35h3v1h-3zM35 35h2v1h-2zM39 35h1v1h-1zM41 35h2v1h-2zM44 35h1v1h-1zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM10 36h5v1h-5zM17 36h2v1h-2zM20 36h7v1h-7zM28 36h2v1h-2zM32 36h10v1h-10zM43 36h2v1h-2zM8 37h1v1h-1zM11 37h1v1h-1zM14 37h1v1h-1zM16 37h3v1h-3zM20 37h1v1h-1zM24 37h2v1h-2zM30 37h2v1h-2zM35 37h2v1h-2zM40 37h3v1h-3zM44 37h1v1h-1zM0 38h7v1h-7zM10 38h3v1h-3zM14 38h2v1h-2zM17 38h4v1h-4zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h2v1h-2zM29 38h1v1h-1zM31 38h2v1h-2zM34 38h3v1h-3zM38 38h1v1h-1zM40 38h1v1h-1zM42 38h2v1h-2zM0 39h1v1h-1zM6 39h1v1h-1zM9 39h1v1h-1zM11 39h2v1h-2zM15 39h1v1h-1zM18 39h3v1h-3zM24 39h2v1h-2zM30 39h1v1h-1zM34 39h3v1h-3zM40 39h4v1h-4zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM10 40h2v1h-2zM13 40h1v1h-1zM17 40h1v1h-1zM20 40h7v1h-7zM30 40h2v1h-2zM34 40h8v1h-8zM43 40h2v1h-2zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM9 41h4v1h-4zM16 41h1v1h-1zM20 41h1v1h-1zM25 41h1v1h-1zM27 41h5v1h-5zM33 41h1v1h-1zM35 41h1v1h-1zM40 41h2v1h-2zM43 41h2v1h-2zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM9 42h1v1h-1zM12 42h1v1h-1zM14 42h3v1h-3zM19 42h1v1h-1zM21 42h2v1h-2zM25 42h1v1h-1zM28 42h1v1h-1zM31 42h1v1h-1zM35 42h2v1h-2zM40 42h1v1h-1zM44 42h1v1h-1zM0 43h1v1h-1zM6 43h1v1h-1zM11 43h1v1h-1zM13 43h1v1h-1zM15 43h3v1h-3zM19 43h4v1h-4zM24 43h1v1h-1zM26 43h3v1h-3zM32 43h1v1h-1zM35 43h3v1h-3zM42 43h1v1h-1zM0 44h7v1h-7zM8 44h3v1h-3zM13 44h2v1h-2zM17 44h1v1h-1zM19 44h1v1h-1zM22 44h3v1h-3zM29 44h3v1h-3zM34 44h2v1h-2zM38 44h2v1h-2zM41 44h1v1h-1zM43 44h1v1h-1z"},{"key":"mysuru","label":"Mysuru","n":45,"d":"M0 0h7v1h-7zM11 0h3v1h-3zM15 0h3v1h-3zM20 0h1v1h-1zM26 0h2v1h-2zM29 0h3v1h-3zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h1v1h-1zM14 1h2v1h-2zM19 1h4v1h-4zM25 1h7v1h-7zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM12 2h1v1h-1zM14 2h3v1h-3zM21 2h2v1h-2zM25 2h6v1h-6zM32 2h1v1h-1zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM10 3h2v1h-2zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM24 3h1v1h-1zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h4v1h-4zM20 4h5v1h-5zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h5v1h-5zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h3v1h-3zM12 5h2v1h-2zM16 5h5v1h-5zM24 5h2v1h-2zM27 5h1v1h-1zM32 5h1v1h-1zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM9 7h1v1h-1zM11 7h1v1h-1zM13 7h1v1h-1zM16 7h5v1h-5zM24 7h4v1h-4zM34 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h2v1h-2zM11 8h1v1h-1zM14 8h1v1h-1zM20 8h5v1h-5zM26 8h1v1h-1zM28 8h1v1h-1zM31 8h1v1h-1zM34 8h2v1h-2zM37 8h1v1h-1zM39 8h1v1h-1zM2 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM10 9h2v1h-2zM13 9h2v1h-2zM17 9h1v1h-1zM20 9h2v1h-2zM23 9h2v1h-2zM29 9h1v1h-1zM31 9h2v1h-2zM37 9h1v1h-1zM40 9h1v1h-1zM42 9h1v1h-1zM44 9h1v1h-1zM1 10h1v1h-1zM3 10h5v1h-5zM10 10h3v1h-3zM18 10h1v1h-1zM20 10h2v1h-2zM23 10h3v1h-3zM27 10h1v1h-1zM29 10h1v1h-1zM32 10h1v1h-1zM34 10h1v1h-1zM36 10h1v1h-1zM41 10h1v1h-1zM44 10h1v1h-1zM0 11h2v1h-2zM7 11h1v1h-1zM10 11h1v1h-1zM12 11h1v1h-1zM15 11h1v1h-1zM17 11h4v1h-4zM25 11h4v1h-4zM33 11h1v1h-1zM35 11h2v1h-2zM38 11h1v1h-1zM40 11h2v1h-2zM43 11h2v1h-2zM1 12h1v1h-1zM5 12h2v1h-2zM9 12h2v1h-2zM12 12h1v1h-1zM14 12h3v1h-3zM18 12h3v1h-3zM23 12h4v1h-4zM28 12h1v1h-1zM31 12h6v1h-6zM39 12h2v1h-2zM8 13h6v1h-6zM16 13h3v1h-3zM24 13h2v1h-2zM27 13h2v1h-2zM31 13h2v1h-2zM34 13h1v1h-1zM37 13h1v1h-1zM44 13h1v1h-1zM1 14h1v1h-1zM3 14h4v1h-4zM10 14h3v1h-3zM14 14h2v1h-2zM18 14h4v1h-4zM24 14h2v1h-2zM29 14h1v1h-1zM31 14h2v1h-2zM34 14h3v1h-3zM39 14h1v1h-1zM42 14h2v1h-2zM3 15h2v1h-2zM7 15h4v1h-4zM13 15h1v1h-1zM15 15h2v1h-2zM25 15h4v1h-4zM30 15h3v1h-3zM35 15h1v1h-1zM37 15h3v1h-3zM4 16h1v1h-1zM6 16h1v1h-1zM9 16h2v1h-2zM13 16h1v1h-1zM17 16h2v1h-2zM21 16h3v1h-3zM26 16h2v1h-2zM29 16h1v1h-1zM32 16h1v1h-1zM37 16h1v1h-1zM39 16h1v1h-1zM41 16h3v1h-3zM0 17h3v1h-3zM5 17h1v1h-1zM7 17h2v1h-2zM10 17h4v1h-4zM16 17h3v1h-3zM20 17h1v1h-1zM23 17h2v1h-2zM26 17h1v1h-1zM29 17h1v1h-1zM31 17h1v1h-1zM33 17h1v1h-1zM35 17h1v1h-1zM38 17h4v1h-4zM5 18h10v1h-10zM17 18h1v1h-1zM19 18h1v1h-1zM24 18h2v1h-2zM28 18h1v1h-1zM31 18h1v1h-1zM33 18h1v1h-1zM35 18h1v1h-1zM37 18h1v1h-1zM41 18h4v1h-4zM0 19h1v1h-1zM2 19h1v1h-1zM8 19h3v1h-3zM15 19h1v1h-1zM18 19h2v1h-2zM22 19h1v1h-1zM24 19h2v1h-2zM27 19h1v1h-1zM31 19h4v1h-4zM36 19h1v1h-1zM39 19h2v1h-2zM44 19h1v1h-1zM0 20h12v1h-12zM14 20h2v1h-2zM18 20h1v1h-1zM20 20h6v1h-6zM27 20h2v1h-2zM30 20h2v1h-2zM33 20h1v1h-1zM36 20h5v1h-5zM1 21h1v1h-1zM4 21h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM15 21h2v1h-2zM18 21h3v1h-3zM24 21h1v1h-1zM28 21h1v1h-1zM31 21h1v1h-1zM36 21h1v1h-1zM40 21h1v1h-1zM43 21h2v1h-2zM4 22h1v1h-1zM6 22h1v1h-1zM8 22h1v1h-1zM13 22h1v1h-1zM15 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h2v1h-2zM27 22h2v1h-2zM31 22h6v1h-6zM38 22h1v1h-1zM40 22h1v1h-1zM42 22h3v1h-3zM0 23h1v1h-1zM4 23h1v1h-1zM8 23h1v1h-1zM10 23h1v1h-1zM12 23h3v1h-3zM16 23h2v1h-2zM20 23h1v1h-1zM24 23h5v1h-5zM30 23h1v1h-1zM34 23h1v1h-1zM36 23h1v1h-1zM40 23h2v1h-2zM43 23h2v1h-2zM1 24h1v1h-1zM3 24h7v1h-7zM12 24h1v1h-1zM14 24h2v1h-2zM18 24h1v1h-1zM20 24h6v1h-6zM27 24h2v1h-2zM30 24h1v1h-1zM32 24h2v1h-2zM35 24h7v1h-7zM43 24h2v1h-2zM0 25h1v1h-1zM2 25h4v1h-4zM9 25h2v1h-2zM12 25h2v1h-2zM15 25h1v1h-1zM19 25h3v1h-3zM23 25h1v1h-1zM25 25h1v1h-1zM27 25h2v1h-2zM31 25h2v1h-2zM34 25h1v1h-1zM36 25h1v1h-1zM38 25h1v1h-1zM40 25h1v1h-1zM44 25h1v1h-1zM1 26h1v1h-1zM3 26h6v1h-6zM11 26h2v1h-2zM18 26h1v1h-1zM23 26h1v1h-1zM26 26h2v1h-2zM29 26h1v1h-1zM31 26h1v1h-1zM36 26h2v1h-2zM39 26h2v1h-2zM42 26h2v1h-2zM1 27h4v1h-4zM9 27h1v1h-1zM12 27h1v1h-1zM14 27h1v1h-1zM16 27h1v1h-1zM23 27h1v1h-1zM27 27h2v1h-2zM30 27h2v1h-2zM34 27h1v1h-1zM36 27h4v1h-4zM41 27h1v1h-1zM43 27h2v1h-2zM0 28h1v1h-1zM2 28h2v1h-2zM5 28h3v1h-3zM9 28h1v1h-1zM11 28h3v1h-3zM16 28h6v1h-6zM23 28h2v1h-2zM27 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM36 28h2v1h-2zM39 28h2v1h-2zM44 28h1v1h-1zM0 29h2v1h-2zM3 29h1v1h-1zM7 29h1v1h-1zM9 29h4v1h-4zM14 29h1v1h-1zM18 29h2v1h-2zM23 29h2v1h-2zM26 29h1v1h-1zM28 29h2v1h-2zM35 29h1v1h-1zM37 29h1v1h-1zM43 29h1v1h-1zM1 30h7v1h-7zM10 30h1v1h-1zM15 30h1v1h-1zM19 30h2v1h-2zM23 30h1v1h-1zM28 30h1v1h-1zM32 30h4v1h-4zM38 30h1v1h-1zM40 30h1v1h-1zM43 30h2v1h-2zM1 31h2v1h-2zM4 31h1v1h-1zM7 31h2v1h-2zM12 31h2v1h-2zM15 31h1v1h-1zM19 31h2v1h-2zM22 31h1v1h-1zM30 31h1v1h-1zM32 31h2v1h-2zM36 31h1v1h-1zM38 31h3v1h-3zM44 31h1v1h-1zM4 32h4v1h-4zM10 32h10v1h-10zM21 32h2v1h-2zM24 32h1v1h-1zM28 32h1v1h-1zM33 32h3v1h-3zM41 32h1v1h-1zM43 32h1v1h-1zM3 33h3v1h-3zM7 33h1v1h-1zM9 33h4v1h-4zM14 33h1v1h-1zM16 33h3v1h-3zM20 33h1v1h-1zM22 33h3v1h-3zM32 33h1v1h-1zM35 33h1v1h-1zM43 33h1v1h-1zM4 34h1v1h-1zM6 34h2v1h-2zM11 34h1v1h-1zM13 34h1v1h-1zM15 34h1v1h-1zM18 34h3v1h-3zM25 34h3v1h-3zM31 34h2v1h-2zM34 34h3v1h-3zM38 34h1v1h-1zM40 34h2v1h-2zM44 34h1v1h-1zM1 35h4v1h-4zM7 35h3v1h-3zM11 35h1v1h-1zM13 35h2v1h-2zM17 35h3v1h-3zM21 35h3v1h-3zM26 35h2v1h-2zM30 35h1v1h-1zM33 35h1v1h-1zM35 35h1v1h-1zM37 35h2v1h-2zM41 35h1v1h-1zM44 35h1v1h-1zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h1v1h-1zM10 36h1v1h-1zM12 36h1v1h-1zM14 36h3v1h-3zM20 36h5v1h-5zM26 36h7v1h-7zM34 36h1v1h-1zM36 36h5v1h-5zM43 36h2v1h-2zM8 37h2v1h-2zM12 37h1v1h-1zM14 37h1v1h-1zM17 37h1v1h-1zM19 37h2v1h-2zM24 37h2v1h-2zM29 37h1v1h-1zM31 37h1v1h-1zM33 37h2v1h-2zM36 37h1v1h-1zM40 37h1v1h-1zM44 37h1v1h-1zM0 38h7v1h-7zM9 38h1v1h-1zM12 38h1v1h-1zM14 38h3v1h-3zM18 38h1v1h-1zM20 38h1v1h-1zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h3v1h-3zM31 38h3v1h-3zM36 38h1v1h-1zM38 38h1v1h-1zM40 38h4v1h-4zM0 39h1v1h-1zM6 39h1v1h-1zM8 39h1v1h-1zM10 39h1v1h-1zM14 39h1v1h-1zM17 39h1v1h-1zM20 39h1v1h-1zM24 39h1v1h-1zM26 39h8v1h-8zM36 39h1v1h-1zM40 39h1v1h-1zM44 39h1v1h-1zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM9 40h3v1h-3zM16 40h2v1h-2zM19 40h6v1h-6zM27 40h1v1h-1zM30 40h1v1h-1zM32 40h10v1h-10zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM8 41h1v1h-1zM10 41h2v1h-2zM13 41h2v1h-2zM16 41h1v1h-1zM18 41h4v1h-4zM23 41h2v1h-2zM26 41h1v1h-1zM28 41h2v1h-2zM31 41h2v1h-2zM35 41h4v1h-4zM40 41h3v1h-3zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM11 42h5v1h-5zM17 42h1v1h-1zM20 42h1v1h-1zM22 42h2v1h-2zM27 42h2v1h-2zM31 42h3v1h-3zM36 42h6v1h-6zM43 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM9 43h2v1h-2zM12 43h3v1h-3zM16 43h1v1h-1zM18 43h3v1h-3zM23 43h2v1h-2zM26 43h1v1h-1zM29 43h2v1h-2zM32 43h3v1h-3zM37 43h1v1h-1zM41 43h1v1h-1zM0 44h7v1h-7zM8 44h1v1h-1zM12 44h1v1h-1zM14 44h3v1h-3zM19 44h1v1h-1zM21 44h1v1h-1zM24 44h2v1h-2zM27 44h2v1h-2zM30 44h2v1h-2zM33 44h1v1h-1zM43 44h1v1h-1z"},{"key":"kalaburagi","label":"Kalaburagi","n":45,"d":"M0 0h7v1h-7zM8 0h1v1h-1zM10 0h3v1h-3zM15 0h1v1h-1zM17 0h1v1h-1zM19 0h2v1h-2zM22 0h1v1h-1zM26 0h2v1h-2zM29 0h2v1h-2zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM13 1h1v1h-1zM16 1h1v1h-1zM18 1h2v1h-2zM21 1h1v1h-1zM23 1h3v1h-3zM32 1h2v1h-2zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h2v1h-2zM14 2h1v1h-1zM16 2h1v1h-1zM22 2h1v1h-1zM24 2h5v1h-5zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM17 3h1v1h-1zM19 3h3v1h-3zM24 3h2v1h-2zM28 3h1v1h-1zM31 3h1v1h-1zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM12 4h4v1h-4zM20 4h5v1h-5zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h5v1h-5zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM15 5h3v1h-3zM19 5h2v1h-2zM24 5h2v1h-2zM29 5h2v1h-2zM32 5h2v1h-2zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h2v1h-2zM11 7h1v1h-1zM13 7h2v1h-2zM16 7h5v1h-5zM24 7h4v1h-4zM29 7h1v1h-1zM31 7h1v1h-1zM34 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h5v1h-5zM13 8h1v1h-1zM15 8h1v1h-1zM17 8h1v1h-1zM19 8h7v1h-7zM32 8h1v1h-1zM35 8h7v1h-7zM44 8h1v1h-1zM1 9h3v1h-3zM7 9h4v1h-4zM12 9h2v1h-2zM15 9h2v1h-2zM18 9h1v1h-1zM26 9h2v1h-2zM29 9h5v1h-5zM35 9h7v1h-7zM1 10h3v1h-3zM6 10h1v1h-1zM8 10h2v1h-2zM14 10h4v1h-4zM19 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM32 10h2v1h-2zM37 10h4v1h-4zM42 10h2v1h-2zM0 11h1v1h-1zM2 11h4v1h-4zM8 11h1v1h-1zM11 11h3v1h-3zM15 11h1v1h-1zM18 11h1v1h-1zM22 11h2v1h-2zM25 11h1v1h-1zM27 11h1v1h-1zM29 11h1v1h-1zM31 11h7v1h-7zM1 12h1v1h-1zM4 12h6v1h-6zM12 12h1v1h-1zM15 12h1v1h-1zM18 12h1v1h-1zM20 12h2v1h-2zM23 12h2v1h-2zM26 12h1v1h-1zM32 12h2v1h-2zM35 12h3v1h-3zM39 12h1v1h-1zM43 12h1v1h-1zM0 13h6v1h-6zM7 13h2v1h-2zM11 13h2v1h-2zM14 13h2v1h-2zM19 13h5v1h-5zM26 13h1v1h-1zM29 13h5v1h-5zM35 13h2v1h-2zM38 13h3v1h-3zM43 13h1v1h-1zM0 14h2v1h-2zM4 14h4v1h-4zM9 14h2v1h-2zM14 14h1v1h-1zM17 14h1v1h-1zM19 14h1v1h-1zM25 14h1v1h-1zM27 14h1v1h-1zM29 14h3v1h-3zM33 14h3v1h-3zM42 14h2v1h-2zM1 15h1v1h-1zM3 15h1v1h-1zM8 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM22 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM30 15h1v1h-1zM32 15h1v1h-1zM34 15h2v1h-2zM43 15h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM9 16h1v1h-1zM11 16h3v1h-3zM17 16h2v1h-2zM21 16h5v1h-5zM27 16h1v1h-1zM29 16h1v1h-1zM32 16h1v1h-1zM34 16h1v1h-1zM37 16h2v1h-2zM43 16h1v1h-1zM1 17h3v1h-3zM5 17h1v1h-1zM7 17h3v1h-3zM11 17h1v1h-1zM13 17h1v1h-1zM15 17h2v1h-2zM19 17h3v1h-3zM23 17h1v1h-1zM25 17h3v1h-3zM29 17h3v1h-3zM35 17h2v1h-2zM38 17h2v1h-2zM41 17h3v1h-3zM0 18h1v1h-1zM2 18h2v1h-2zM6 18h2v1h-2zM9 18h2v1h-2zM12 18h2v1h-2zM15 18h1v1h-1zM18 18h4v1h-4zM23 18h1v1h-1zM25 18h2v1h-2zM29 18h4v1h-4zM36 18h1v1h-1zM38 18h2v1h-2zM43 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM5 19h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM15 19h1v1h-1zM18 19h2v1h-2zM22 19h4v1h-4zM27 19h2v1h-2zM31 19h4v1h-4zM36 19h1v1h-1zM39 19h2v1h-2zM43 19h2v1h-2zM0 20h1v1h-1zM2 20h1v1h-1zM4 20h6v1h-6zM13 20h1v1h-1zM15 20h1v1h-1zM17 20h8v1h-8zM26 20h2v1h-2zM29 20h2v1h-2zM32 20h10v1h-10zM43 20h2v1h-2zM0 21h2v1h-2zM3 21h2v1h-2zM8 21h5v1h-5zM14 21h2v1h-2zM17 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h2v1h-2zM29 21h5v1h-5zM35 21h2v1h-2zM40 21h4v1h-4zM3 22h2v1h-2zM6 22h1v1h-1zM8 22h5v1h-5zM14 22h1v1h-1zM16 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h4v1h-4zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h2v1h-2zM0 23h3v1h-3zM4 23h1v1h-1zM8 23h1v1h-1zM11 23h2v1h-2zM14 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h1v1h-1zM35 23h2v1h-2zM40 23h1v1h-1zM1 24h1v1h-1zM4 24h7v1h-7zM12 24h2v1h-2zM15 24h1v1h-1zM18 24h7v1h-7zM27 24h1v1h-1zM29 24h2v1h-2zM32 24h10v1h-10zM44 24h1v1h-1zM0 25h1v1h-1zM5 25h1v1h-1zM7 25h2v1h-2zM11 25h1v1h-1zM13 25h1v1h-1zM15 25h4v1h-4zM22 25h1v1h-1zM24 25h1v1h-1zM26 25h1v1h-1zM30 25h4v1h-4zM35 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM41 25h3v1h-3zM1 26h9v1h-9zM11 26h1v1h-1zM13 26h2v1h-2zM16 26h1v1h-1zM21 26h1v1h-1zM23 26h2v1h-2zM26 26h1v1h-1zM30 26h2v1h-2zM33 26h1v1h-1zM37 26h1v1h-1zM40 26h1v1h-1zM43 26h1v1h-1zM0 27h3v1h-3zM4 27h1v1h-1zM7 27h1v1h-1zM9 27h2v1h-2zM12 27h1v1h-1zM19 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM35 27h2v1h-2zM38 27h4v1h-4zM44 27h1v1h-1zM0 28h1v1h-1zM2 28h5v1h-5zM9 28h1v1h-1zM12 28h1v1h-1zM16 28h6v1h-6zM23 28h2v1h-2zM26 28h2v1h-2zM30 28h1v1h-1zM32 28h1v1h-1zM36 28h2v1h-2zM39 28h2v1h-2zM44 28h1v1h-1zM1 29h1v1h-1zM4 29h1v1h-1zM7 29h2v1h-2zM10 29h2v1h-2zM13 29h1v1h-1zM15 29h1v1h-1zM19 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM26 29h5v1h-5zM33 29h1v1h-1zM35 29h1v1h-1zM37 29h1v1h-1zM39 29h1v1h-1zM41 29h1v1h-1zM43 29h1v1h-1zM0 30h2v1h-2zM6 30h1v1h-1zM9 30h2v1h-2zM14 30h1v1h-1zM17 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM24 30h1v1h-1zM26 30h5v1h-5zM34 30h3v1h-3zM39 30h2v1h-2zM43 30h1v1h-1zM1 31h2v1h-2zM10 31h1v1h-1zM12 31h2v1h-2zM15 31h1v1h-1zM18 31h4v1h-4zM27 31h1v1h-1zM30 31h1v1h-1zM32 31h3v1h-3zM36 31h1v1h-1zM38 31h3v1h-3zM44 31h1v1h-1zM1 32h2v1h-2zM6 32h2v1h-2zM9 32h1v1h-1zM12 32h1v1h-1zM15 32h1v1h-1zM17 32h2v1h-2zM21 32h1v1h-1zM23 32h2v1h-2zM26 32h2v1h-2zM29 32h1v1h-1zM31 32h2v1h-2zM37 32h2v1h-2zM40 32h2v1h-2zM44 32h1v1h-1zM0 33h1v1h-1zM2 33h1v1h-1zM4 33h1v1h-1zM7 33h1v1h-1zM10 33h3v1h-3zM15 33h5v1h-5zM25 33h3v1h-3zM29 33h2v1h-2zM33 33h1v1h-1zM36 33h1v1h-1zM38 33h2v1h-2zM41 33h4v1h-4zM4 34h1v1h-1zM6 34h1v1h-1zM8 34h4v1h-4zM14 34h1v1h-1zM16 34h2v1h-2zM21 34h2v1h-2zM24 34h3v1h-3zM28 34h3v1h-3zM37 34h1v1h-1zM39 34h1v1h-1zM42 34h2v1h-2zM1 35h4v1h-4zM8 35h1v1h-1zM10 35h1v1h-1zM16 35h3v1h-3zM20 35h2v1h-2zM23 35h1v1h-1zM25 35h1v1h-1zM29 35h6v1h-6zM40 35h1v1h-1zM43 35h1v1h-1zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM9 36h1v1h-1zM12 36h3v1h-3zM18 36h10v1h-10zM30 36h1v1h-1zM32 36h1v1h-1zM36 36h5v1h-5zM43 36h2v1h-2zM8 37h2v1h-2zM11 37h1v1h-1zM13 37h1v1h-1zM18 37h1v1h-1zM20 37h1v1h-1zM24 37h1v1h-1zM26 37h2v1h-2zM29 37h2v1h-2zM32 37h1v1h-1zM35 37h2v1h-2zM40 37h4v1h-4zM0 38h7v1h-7zM8 38h1v1h-1zM14 38h3v1h-3zM20 38h1v1h-1zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h2v1h-2zM29 38h4v1h-4zM36 38h1v1h-1zM38 38h1v1h-1zM40 38h2v1h-2zM43 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM13 39h1v1h-1zM16 39h2v1h-2zM19 39h2v1h-2zM24 39h4v1h-4zM29 39h1v1h-1zM31 39h4v1h-4zM36 39h1v1h-1zM40 39h1v1h-1zM43 39h2v1h-2zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM8 40h4v1h-4zM17 40h1v1h-1zM19 40h6v1h-6zM27 40h1v1h-1zM29 40h1v1h-1zM32 40h10v1h-10zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM9 41h5v1h-5zM15 41h1v1h-1zM19 41h2v1h-2zM24 41h1v1h-1zM26 41h8v1h-8zM35 41h1v1h-1zM38 41h2v1h-2zM41 41h1v1h-1zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM9 42h1v1h-1zM15 42h2v1h-2zM18 42h1v1h-1zM21 42h3v1h-3zM26 42h1v1h-1zM28 42h1v1h-1zM35 42h1v1h-1zM37 42h1v1h-1zM40 42h1v1h-1zM42 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM9 43h2v1h-2zM12 43h1v1h-1zM14 43h1v1h-1zM18 43h3v1h-3zM23 43h1v1h-1zM29 43h2v1h-2zM32 43h3v1h-3zM37 43h1v1h-1zM39 43h3v1h-3zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h1v1h-1zM13 44h1v1h-1zM15 44h1v1h-1zM17 44h1v1h-1zM20 44h6v1h-6zM27 44h1v1h-1zM29 44h2v1h-2zM32 44h4v1h-4zM37 44h2v1h-2zM41 44h1v1h-1zM44 44h1v1h-1z"}];
+function initQr(){
+  const tabs=document.getElementById('rtabs');if(!tabs)return;
+  const path=document.getElementById('qrPath');
+  const svg=document.getElementById('qrSvg');
+  const cap=document.getElementById('qrCap');
+  const pick=(r,btn)=>{
+    path.setAttribute('d',r.d);
+    svg.setAttribute('viewBox','0 0 '+r.n+' '+r.n);
+    cap.textContent=r.label;
+    tabs.querySelectorAll('.rtab').forEach(b=>b.classList.toggle('on',b===btn));
+  };
+  REGIONS.forEach((r,i)=>{
+    const b=document.createElement('button');
+    b.className='rtab';b.type='button';b.textContent=r.label;
+    b.addEventListener('click',()=>{if(!document.body.classList.contains('editing'))pick(r,b);});
+    tabs.appendChild(b);
+    if(i===0)pick(r,b);
+  });
+}
+
+/* ===========================================
+   RANKERS LIST (slide 14) — click teams in finish order
+   Rank 1 → 10 pts … Rank 10 → 1 pt
+   =========================================== */
+const ranker={
+  order:[],
+  init(){
+    const pool=document.getElementById('pool');if(!pool)return;
+    this.list=document.getElementById('rankList');
+    this.empty=document.getElementById('rankEmpty');
+    pool.querySelectorAll('.team-chip').forEach(ch=>{
+      ch.addEventListener('click',()=>{
+        if(document.body.classList.contains('editing'))return;
+        if(ch.classList.contains('placed'))return;
+        this.order.push(ch);
+        ch.classList.add('placed');
+        ch.querySelector('.rk').textContent='#'+this.order.length;
+        tone(1175,.15);
+        this.render();
+      });
+    });
+    document.getElementById('undoRank').onclick=()=>{
+      const ch=this.order.pop();
+      if(ch){ch.classList.remove('placed');ch.querySelector('.rk').textContent='';this.render();}
+    };
+    document.getElementById('resetRank').onclick=()=>{
+      this.order.forEach(ch=>{ch.classList.remove('placed');ch.querySelector('.rk').textContent='';});
+      this.order=[];this.render();
+    };
+    this.render();
+  },
+  render(){
+    this.list.innerHTML='';
+    this.empty.style.display=this.order.length?'none':'block';
+    this.order.forEach((ch,i)=>{
+      const r=i+1, pts=11-r;
+      const li=document.createElement('li');
+      li.className='rrow'+(r===1?' top':'');
+      li.style.animationDelay=(i*0.02)+'s';
+      const rank=document.createElement('span');rank.className='rr-rank';rank.textContent=String(r).padStart(2,'0');
+      const name=document.createElement('span');name.className='rr-name';name.textContent=ch.querySelector('.nm').textContent;
+      const p=document.createElement('span');p.className='rr-pts';p.innerHTML=pts+'<small>pts</small>';
+      li.append(rank,name,p);
+      this.list.appendChild(li);
+    });
+  }
+};
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+const editor={isActive:false,nodes:[...document.querySelectorAll('[data-edit]')],key:'bridge-day1-yogabar-edits-v2',
+  init(){this.nodes.forEach((n,i)=>n.dataset.ek=i);this.load();
+    document.getElementById('editToggle').addEventListener('click',()=>this.toggle());
+    const hz=document.querySelector('.edit-hotzone'),bt=document.getElementById('editToggle');let t=null;
+    hz.addEventListener('mouseenter',()=>{clearTimeout(t);bt.classList.add('show');});
+    hz.addEventListener('mouseleave',()=>{t=setTimeout(()=>{if(!this.isActive)bt.classList.remove('show');},400);});
+    bt.addEventListener('mouseenter',()=>clearTimeout(t));
+    bt.addEventListener('mouseleave',()=>{t=setTimeout(()=>{if(!this.isActive)bt.classList.remove('show');},400);});
+    hz.addEventListener('click',()=>this.toggle());
+    addEventListener('keydown',e=>{if((e.key==='e'||e.key==='E')&&!e.target.isContentEditable){this.toggle();}
+      if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();this.save();}});},
+  toggle(){this.isActive=!this.isActive;document.body.classList.toggle('editing',this.isActive);
+    document.getElementById('editToggle').classList.toggle('active',this.isActive);
+    this.nodes.forEach(n=>n.contentEditable=this.isActive);if(!this.isActive)this.save();},
+  save(){const d={};this.nodes.forEach(n=>d[n.dataset.ek]=n.innerHTML);try{localStorage.setItem(this.key,JSON.stringify(d));}catch(e){}},
+  load(){try{const d=JSON.parse(localStorage.getItem(this.key)||'{}');
+    this.nodes.forEach(n=>{const k=n.dataset.ek;if(d[k]!=null)n.innerHTML=d[k];});}catch(e){}}
+};
+
+document.querySelectorAll('.timer').forEach(setupTimer);
+stampColumns('cols','row');
+stampColumns('teamcols','team');
+initQr();
+ranker.init();
+editor.init();
+new Deck();
+</script>
+</body>
+</html>
